@@ -1,24 +1,39 @@
 /*
 ===========================================================================
-Copyright (C) 1999-2005 Id Software, Inc.
 
-This file is part of Quake III Arena source code.
+Return to Castle Wolfenstein single player GPL Source Code
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-Quake III Arena source code is free software; you can redistribute it
-and/or modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2 of the License,
-or (at your option) any later version.
+This file is part of the Return to Castle Wolfenstein single player GPL Source Code (RTCW SP Source Code).  
 
-Quake III Arena source code is distributed in the hope that it will be
-useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+RTCW SP Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+RTCW SP Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+along with RTCW SP Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the RTCW SP Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the RTCW SP Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
 ===========================================================================
 */
+
+//===========================================================================
+//
+// Name:				aas_gsubdiv.c
+// Function:		Gravitational Subdivision
+// Programmer:		Mr Elusive (MrElusive@demigod.demon.nl)
+// Last update:	1997-12-04
+// Tab Size:		3
+//===========================================================================
 
 #include "qbsp.h"
 #include "botlib/aasfile.h"
@@ -26,8 +41,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "aas_store.h"
 #include "aas_cfg.h"
 
-#define FACECLIP_EPSILON			0.2
-#define FACE_EPSILON					1.0
+#define FACECLIP_EPSILON            0.2
+#define FACE_EPSILON                    1.0
 
 int numgravitationalsubdivisions = 0;
 int numladdersubdivisions = 0;
@@ -42,53 +57,46 @@ int numladdersubdivisions = 0;
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-void AAS_SplitFace(tmp_face_t *face, vec3_t normal, float dist,
-							tmp_face_t **frontface, tmp_face_t **backface)
-{
+void AAS_SplitFace( tmp_face_t *face, vec3_t normal, float dist,
+					tmp_face_t **frontface, tmp_face_t **backface ) {
 	winding_t *frontw, *backw;
 
 	//
 	*frontface = *backface = NULL;
 
-	ClipWindingEpsilon(face->winding, normal, dist, FACECLIP_EPSILON, &frontw, &backw);
+	ClipWindingEpsilon( face->winding, normal, dist, FACECLIP_EPSILON, &frontw, &backw );
 
 #ifdef DEBUG
 	//
-	if (frontw)
-	{
-		if (WindingIsTiny(frontw))
-		{
-			Log_Write("AAS_SplitFace: tiny back face\r\n");
-			FreeWinding(frontw);
+	if ( frontw ) {
+		if ( WindingIsTiny( frontw ) ) {
+			Log_Write( "AAS_SplitFace: tiny back face\r\n" );
+			FreeWinding( frontw );
 			frontw = NULL;
 		} //end if
 	} //end if
-	if (backw)
-	{
-		if (WindingIsTiny(backw))
-		{
-			Log_Write("AAS_SplitFace: tiny back face\r\n");
-			FreeWinding(backw);
+	if ( backw ) {
+		if ( WindingIsTiny( backw ) ) {
+			Log_Write( "AAS_SplitFace: tiny back face\r\n" );
+			FreeWinding( backw );
 			backw = NULL;
 		} //end if
 	} //end if
 #endif //DEBUG
-	//if the winding was split
-	if (frontw)
-	{
+	   //if the winding was split
+	if ( frontw ) {
 		//check bounds
-		(*frontface) = AAS_AllocTmpFace();
-		(*frontface)->planenum = face->planenum;
-		(*frontface)->winding = frontw;
-		(*frontface)->faceflags = face->faceflags;
+		( *frontface ) = AAS_AllocTmpFace();
+		( *frontface )->planenum = face->planenum;
+		( *frontface )->winding = frontw;
+		( *frontface )->faceflags = face->faceflags;
 	} //end if
-	if (backw)
-	{
+	if ( backw ) {
 		//check bounds
-		(*backface) = AAS_AllocTmpFace();
-		(*backface)->planenum = face->planenum;
-		(*backface)->winding = backw;
-		(*backface)->faceflags = face->faceflags;
+		( *backface ) = AAS_AllocTmpFace();
+		( *backface )->planenum = face->planenum;
+		( *backface )->winding = backw;
+		( *backface )->faceflags = face->faceflags;
 	} //end if
 } //end of the function AAS_SplitFace
 //===========================================================================
@@ -97,8 +105,7 @@ void AAS_SplitFace(tmp_face_t *face, vec3_t normal, float dist,
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-winding_t *AAS_SplitWinding(tmp_area_t *tmparea, int planenum)
-{
+winding_t *AAS_SplitWinding( tmp_area_t *tmparea, int planenum ) {
 	tmp_face_t *face;
 	plane_t *plane;
 	int side;
@@ -107,14 +114,14 @@ winding_t *AAS_SplitWinding(tmp_area_t *tmparea, int planenum)
 	//
 	plane = &mapplanes[planenum];
 	//create a split winding, first base winding for plane
-	splitwinding = BaseWindingForPlane(plane->normal, plane->dist);
+	splitwinding = BaseWindingForPlane( plane->normal, plane->dist );
 	//chop with all the faces of the area
-	for (face = tmparea->tmpfaces; face && splitwinding; face = face->next[side])
+	for ( face = tmparea->tmpfaces; face && splitwinding; face = face->next[side] )
 	{
 		//side of the face the original area was on
 		side = face->frontarea != tmparea;
 		plane = &mapplanes[face->planenum ^ side];
-		ChopWindingInPlace(&splitwinding, plane->normal, plane->dist, 0); // PLANESIDE_EPSILON);
+		ChopWindingInPlace( &splitwinding, plane->normal, plane->dist, 0 ); // PLANESIDE_EPSILON);
 	} //end for
 	return splitwinding;
 } //end of the function AAS_SplitWinding
@@ -124,9 +131,8 @@ winding_t *AAS_SplitWinding(tmp_area_t *tmparea, int planenum)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-int AAS_TestSplitPlane(tmp_area_t *tmparea, vec3_t normal, float dist,
-							int *facesplits, int *groundsplits, int *epsilonfaces)
-{
+int AAS_TestSplitPlane( tmp_area_t *tmparea, vec3_t normal, float dist,
+						int *facesplits, int *groundsplits, int *epsilonfaces ) {
 	int j, side, front, back, planenum;
 	float d, d_front, d_back;
 	tmp_face_t *face;
@@ -134,20 +140,21 @@ int AAS_TestSplitPlane(tmp_area_t *tmparea, vec3_t normal, float dist,
 
 	*facesplits = *groundsplits = *epsilonfaces = 0;
 
-	planenum = FindFloatPlane(normal, dist);
+	planenum = FindFloatPlane( normal, dist );
 
-	w = AAS_SplitWinding(tmparea, planenum);
-	if (!w) return false;
-	FreeWinding(w);
+	w = AAS_SplitWinding( tmparea, planenum );
+	if ( !w ) {
+		return false;
+	}
+	FreeWinding( w );
 	//
-	for (face = tmparea->tmpfaces; face; face = face->next[side])
+	for ( face = tmparea->tmpfaces; face; face = face->next[side] )
 	{
 		//side of the face the area is on
 		side = face->frontarea != tmparea;
 
-		if ((face->planenum & ~1) == (planenum & ~1))
-		{
-			Log_Print("AAS_TestSplitPlane: tried face plane as splitter\n");
+		if ( ( face->planenum & ~1 ) == ( planenum & ~1 ) ) {
+			Log_Print( "AAS_TestSplitPlane: tried face plane as splitter\n" );
 			return false;
 		} //end if
 		w = face->winding;
@@ -155,30 +162,33 @@ int AAS_TestSplitPlane(tmp_area_t *tmparea, vec3_t normal, float dist,
 		d_front = d_back = 0;
 		//reset front and back flags
 		front = back = 0;
-		for (j = 0; j < w->numpoints; j++)
+		for ( j = 0; j < w->numpoints; j++ )
 		{
-			d = DotProduct(w->p[j], normal) - dist;
-			if (d > d_front) d_front = d;
-			if (d < d_back) d_back = d;
+			d = DotProduct( w->p[j], normal ) - dist;
+			if ( d > d_front ) {
+				d_front = d;
+			}
+			if ( d < d_back ) {
+				d_back = d;
+			}
 
-			if (d > 0.4) // PLANESIDE_EPSILON)
+			if ( d > 0.4 ) { // PLANESIDE_EPSILON)
 				front = 1;
-			if (d < -0.4) // PLANESIDE_EPSILON)
+			}
+			if ( d < -0.4 ) { // PLANESIDE_EPSILON)
 				back = 1;
+			}
 		} //end for
-		//check for an epsilon face
-		if ( (d_front > FACECLIP_EPSILON && d_front < FACE_EPSILON)
-			|| (d_back < -FACECLIP_EPSILON && d_back > -FACE_EPSILON) )
-		{
-			(*epsilonfaces)++;
+		  //check for an epsilon face
+		if ( ( d_front > FACECLIP_EPSILON && d_front < FACE_EPSILON )
+			 || ( d_back < -FACECLIP_EPSILON && d_back > -FACE_EPSILON ) ) {
+			( *epsilonfaces )++;
 		} //end if
-		//if the face has points at both sides of the plane
-		if (front && back)
-		{
-			(*facesplits)++;
-			if (face->faceflags & FACE_GROUND)
-			{
-				(*groundsplits)++;
+		  //if the face has points at both sides of the plane
+		if ( front && back ) {
+			( *facesplits )++;
+			if ( face->faceflags & FACE_GROUND ) {
+				( *groundsplits )++;
 			} //end if
 		} //end if
 	} //end for
@@ -190,8 +200,7 @@ int AAS_TestSplitPlane(tmp_area_t *tmparea, vec3_t normal, float dist,
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-void AAS_SplitArea(tmp_area_t *tmparea, int planenum, tmp_area_t **frontarea, tmp_area_t **backarea)
-{
+void AAS_SplitArea( tmp_area_t *tmparea, int planenum, tmp_area_t **frontarea, tmp_area_t **backarea ) {
 	int side;
 	tmp_area_t *facefrontarea, *facebackarea, *faceotherarea;
 	tmp_face_t *face, *frontface, *backface, *splitface, *nextface;
@@ -211,8 +220,8 @@ void AAS_SplitArea(tmp_area_t *tmparea, int planenum, tmp_area_t **frontarea, tm
 #endif //AW_DEBUG*/
 	//the original area
 
-	AAS_FlipAreaFaces(tmparea);
-	AAS_CheckArea(tmparea);
+	AAS_FlipAreaFaces( tmparea );
+	AAS_CheckArea( tmparea );
 	//
 	splitplane = &mapplanes[planenum];
 /*	//create a split winding, first base winding for plane
@@ -225,9 +234,8 @@ void AAS_SplitArea(tmp_area_t *tmparea, int planenum, tmp_area_t **frontarea, tm
 		plane = &mapplanes[face->planenum ^ side];
 		ChopWindingInPlace(&splitwinding, plane->normal, plane->dist, 0); // PLANESIDE_EPSILON);
 	} //end for*/
-	splitwinding = AAS_SplitWinding(tmparea, planenum);
-	if (!splitwinding)
-	{
+	splitwinding = AAS_SplitWinding( tmparea, planenum );
+	if ( !splitwinding ) {
 /*
 #ifdef DEBUG
 		AAS_TestSplitPlane(areanum, normal, dist,
@@ -235,32 +243,32 @@ void AAS_SplitArea(tmp_area_t *tmparea, int planenum, tmp_area_t **frontarea, tm
 		Log_Print("\nface splits = %d\nground splits = %d\n", facesplits, groundsplits);
 		if (epsilonface) Log_Print("aaahh epsilon face\n");
 #endif //DEBUG*/
-		Error("AAS_SplitArea: no split winding when splitting area %d\n", tmparea->areanum);
+		Error( "AAS_SplitArea: no split winding when splitting area %d\n", tmparea->areanum );
 	} //end if
-	//create a split face
+	  //create a split face
 	splitface = AAS_AllocTmpFace();
 	//get the map plane
 	splitface->planenum = planenum;
 	//store the split winding
 	splitface->winding = splitwinding;
 	//the new front area
-	(*frontarea) = AAS_AllocTmpArea();
-	(*frontarea)->presencetype = tmparea->presencetype;
-	(*frontarea)->contents = tmparea->contents;
-	(*frontarea)->modelnum = tmparea->modelnum;
-	(*frontarea)->tmpfaces = NULL;
+	( *frontarea ) = AAS_AllocTmpArea();
+	( *frontarea )->presencetype = tmparea->presencetype;
+	( *frontarea )->contents = tmparea->contents;
+	( *frontarea )->modelnum = tmparea->modelnum;
+	( *frontarea )->tmpfaces = NULL;
 	//the new back area
-	(*backarea) = AAS_AllocTmpArea();
-	(*backarea)->presencetype = tmparea->presencetype;
-	(*backarea)->contents = tmparea->contents;
-	(*backarea)->modelnum = tmparea->modelnum;
-	(*backarea)->tmpfaces = NULL;
+	( *backarea ) = AAS_AllocTmpArea();
+	( *backarea )->presencetype = tmparea->presencetype;
+	( *backarea )->contents = tmparea->contents;
+	( *backarea )->modelnum = tmparea->modelnum;
+	( *backarea )->tmpfaces = NULL;
 	//add the split face to the new areas
-	AAS_AddFaceSideToArea(splitface, 0, (*frontarea));
-	AAS_AddFaceSideToArea(splitface, 1, (*backarea));
+	AAS_AddFaceSideToArea( splitface, 0, ( *frontarea ) );
+	AAS_AddFaceSideToArea( splitface, 1, ( *backarea ) );
 
 	//split all the faces of the original area
-	for (face = tmparea->tmpfaces; face; face = nextface)
+	for ( face = tmparea->tmpfaces; face; face = nextface )
 	{
 		//side of the face the original area was on
 		side = face->frontarea != tmparea;
@@ -271,28 +279,44 @@ void AAS_SplitArea(tmp_area_t *tmparea, int planenum, tmp_area_t **frontarea, tm
 		//back area of the face
 		facebackarea = face->backarea;
 		//remove the face from both the front and back areas
-		if (facefrontarea) AAS_RemoveFaceFromArea(face, facefrontarea);
-		if (facebackarea) AAS_RemoveFaceFromArea(face, facebackarea);
+		if ( facefrontarea ) {
+			AAS_RemoveFaceFromArea( face, facefrontarea );
+		}
+		if ( facebackarea ) {
+			AAS_RemoveFaceFromArea( face, facebackarea );
+		}
 		//split the face
-		AAS_SplitFace(face, splitplane->normal, splitplane->dist, &frontface, &backface);
+		AAS_SplitFace( face, splitplane->normal, splitplane->dist, &frontface, &backface );
 		//free the original face
-		AAS_FreeTmpFace(face);
+		AAS_FreeTmpFace( face );
 		//get the number of the area at the other side of the face
-		if (side) faceotherarea = facefrontarea;
-		else faceotherarea = facebackarea;
+		if ( side ) {
+			faceotherarea = facefrontarea;
+		} else { faceotherarea = facebackarea;}
 		//if there is an area at the other side of the original face
-		if (faceotherarea)
-		{
-			if (frontface) AAS_AddFaceSideToArea(frontface, !side, faceotherarea);
-			if (backface) AAS_AddFaceSideToArea(backface, !side, faceotherarea);
+		if ( faceotherarea ) {
+			if ( frontface ) {
+				AAS_AddFaceSideToArea( frontface, !side, faceotherarea );
+			}
+			if ( backface ) {
+				AAS_AddFaceSideToArea( backface, !side, faceotherarea );
+			}
 		} //end if
-		//add the front and back part left after splitting the original face to the new areas
-		if (frontface) AAS_AddFaceSideToArea(frontface, side, (*frontarea));
-		if (backface) AAS_AddFaceSideToArea(backface, side, (*backarea));
+		  //add the front and back part left after splitting the original face to the new areas
+		if ( frontface ) {
+			AAS_AddFaceSideToArea( frontface, side, ( *frontarea ) );
+		}
+		if ( backface ) {
+			AAS_AddFaceSideToArea( backface, side, ( *backarea ) );
+		}
 	} //end for
 
-	if (!(*frontarea)->tmpfaces) Log_Print("AAS_SplitArea: front area without faces\n");
-	if (!(*backarea)->tmpfaces) Log_Print("AAS_SplitArea: back area without faces\n");
+	if ( !( *frontarea )->tmpfaces ) {
+		Log_Print( "AAS_SplitArea: front area without faces\n" );
+	}
+	if ( !( *backarea )->tmpfaces ) {
+		Log_Print( "AAS_SplitArea: back area without faces\n" );
+	}
 
 	tmparea->invalid = true;
 /*
@@ -312,11 +336,11 @@ void AAS_SplitArea(tmp_area_t *tmparea, int planenum, tmp_area_t **frontarea, tm
 	Log_Print("created back area %d with %d faces\n", backarea->areanum, i);
 #endif //AW_DEBUG*/
 
-	AAS_FlipAreaFaces((*frontarea));
-	AAS_FlipAreaFaces((*backarea));
+	AAS_FlipAreaFaces( ( *frontarea ) );
+	AAS_FlipAreaFaces( ( *backarea ) );
 	//
-	AAS_CheckArea((*frontarea));
-	AAS_CheckArea((*backarea));
+	AAS_CheckArea( ( *frontarea ) );
+	AAS_CheckArea( ( *backarea ) );
 } //end of the function AAS_SplitArea
 //===========================================================================
 //
@@ -324,8 +348,7 @@ void AAS_SplitArea(tmp_area_t *tmparea, int planenum, tmp_area_t **frontarea, tm
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-int AAS_FindBestAreaSplitPlane(tmp_area_t *tmparea, vec3_t normal, float *dist)
-{
+int AAS_FindBestAreaSplitPlane( tmp_area_t *tmparea, vec3_t normal, float *dist ) {
 	int side1, side2;
 	int foundsplitter, facesplits, groundsplits, epsilonfaces, bestepsilonfaces;
 	float bestvalue, value;
@@ -334,67 +357,71 @@ int AAS_FindBestAreaSplitPlane(tmp_area_t *tmparea, vec3_t normal, float *dist)
 	float tmpdist;
 
 	//get inverse of gravity direction
-	VectorCopy(cfg.phys_gravitydirection, invgravity);
-	VectorInverse(invgravity);
+	VectorCopy( cfg.phys_gravitydirection, invgravity );
+	VectorInverse( invgravity );
 
 	foundsplitter = false;
 	bestvalue = -999999;
 	bestepsilonfaces = 0;
 	//
 #ifdef AW_DEBUG
-	Log_Print("finding split plane for area %d\n", tmparea->areanum);
+	Log_Print( "finding split plane for area %d\n", tmparea->areanum );
 #endif //AW_DEBUG
-	for (face1 = tmparea->tmpfaces; face1; face1 = face1->next[side1])
+	for ( face1 = tmparea->tmpfaces; face1; face1 = face1->next[side1] )
 	{
 		//side of the face the area is on
 		side1 = face1->frontarea != tmparea;
 		//
-		if (WindingIsTiny(face1->winding))
-		{
-			Log_Write("gsubdiv: area %d has a tiny winding\r\n", tmparea->areanum);
+		if ( WindingIsTiny( face1->winding ) ) {
+			Log_Write( "gsubdiv: area %d has a tiny winding\r\n", tmparea->areanum );
 			continue;
 		} //end if
-		//if the face isn't a gap or ground there's no split edge
-		if (!(face1->faceflags & FACE_GROUND) && !AAS_GapFace(face1, side1)) continue;
+		  //if the face isn't a gap or ground there's no split edge
+		if ( !( face1->faceflags & FACE_GROUND ) && !AAS_GapFace( face1, side1 ) ) {
+			continue;
+		}
 		//
-		for (face2 = face1->next[side1]; face2; face2 = face2->next[side2])
+		for ( face2 = face1->next[side1]; face2; face2 = face2->next[side2] )
 		{
 			//side of the face the area is on
 			side2 = face2->frontarea != tmparea;
 			//
-			if (WindingIsTiny(face1->winding))
-			{
-				Log_Write("gsubdiv: area %d has a tiny winding\r\n", tmparea->areanum);
+			if ( WindingIsTiny( face1->winding ) ) {
+				Log_Write( "gsubdiv: area %d has a tiny winding\r\n", tmparea->areanum );
 				continue;
 			} //end if
-			//if the face isn't a gap or ground there's no split edge
-			if (!(face2->faceflags & FACE_GROUND) && !AAS_GapFace(face2, side2)) continue;
+			  //if the face isn't a gap or ground there's no split edge
+			if ( !( face2->faceflags & FACE_GROUND ) && !AAS_GapFace( face2, side2 ) ) {
+				continue;
+			}
 			//only split between gaps and ground
-			if (!(((face1->faceflags & FACE_GROUND) && AAS_GapFace(face2, side2)) ||
-					((face2->faceflags & FACE_GROUND) && AAS_GapFace(face1, side1)))) continue;
+			if ( !( ( ( face1->faceflags & FACE_GROUND ) && AAS_GapFace( face2, side2 ) ) ||
+					( ( face2->faceflags & FACE_GROUND ) && AAS_GapFace( face1, side1 ) ) ) ) {
+				continue;
+			}
 			//find a plane seperating the windings of the faces
-			if (!FindPlaneSeperatingWindings(face1->winding, face2->winding, invgravity,
-														tmpnormal, &tmpdist)) continue;
+			if ( !FindPlaneSeperatingWindings( face1->winding, face2->winding, invgravity,
+											   tmpnormal, &tmpdist ) ) {
+				continue;
+			}
 #ifdef AW_DEBUG
-			Log_Print("normal = \'%f %f %f\', dist = %f\n",
-							tmpnormal[0], tmpnormal[1], tmpnormal[2], tmpdist);
+			Log_Print( "normal = \'%f %f %f\', dist = %f\n",
+					   tmpnormal[0], tmpnormal[1], tmpnormal[2], tmpdist );
 #endif //AW_DEBUG
 			//get metrics for this vertical plane
-			if (!AAS_TestSplitPlane(tmparea, tmpnormal, tmpdist,
-										&facesplits, &groundsplits, &epsilonfaces))
-			{
+			if ( !AAS_TestSplitPlane( tmparea, tmpnormal, tmpdist,
+									  &facesplits, &groundsplits, &epsilonfaces ) ) {
 				continue;
 			} //end if
 #ifdef AW_DEBUG
-			Log_Print("face splits = %d\nground splits = %d\n",
-							facesplits, groundsplits);
+			Log_Print( "face splits = %d\nground splits = %d\n",
+					   facesplits, groundsplits );
 #endif //AW_DEBUG
 			value = 100 - facesplits - 2 * groundsplits;
 			//avoid epsilon faces
 			value += epsilonfaces * -1000;
-			if (value > bestvalue)
-			{
-				VectorCopy(tmpnormal, normal);
+			if ( value > bestvalue ) {
+				VectorCopy( tmpnormal, normal );
 				*dist = tmpdist;
 				bestvalue = value;
 				bestepsilonfaces = epsilonfaces;
@@ -402,10 +429,9 @@ int AAS_FindBestAreaSplitPlane(tmp_area_t *tmparea, vec3_t normal, float *dist)
 			} //end if
 		} //end for
 	} //end for
-	if (bestepsilonfaces)
-	{
-		Log_Write("found %d epsilon faces trying to split area %d\r\n",
-									epsilonfaces, tmparea->areanum);
+	if ( bestepsilonfaces ) {
+		Log_Write( "found %d epsilon faces trying to split area %d\r\n",
+				   epsilonfaces, tmparea->areanum );
 	} //end else
 	return foundsplitter;
 } //end of the function AAS_FindBestAreaSplitPlane
@@ -415,24 +441,22 @@ int AAS_FindBestAreaSplitPlane(tmp_area_t *tmparea, vec3_t normal, float *dist)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-tmp_node_t *AAS_SubdivideArea_r(tmp_node_t *tmpnode)
-{
+tmp_node_t *AAS_SubdivideArea_r( tmp_node_t *tmpnode ) {
 	int planenum;
 	tmp_area_t *frontarea, *backarea;
 	tmp_node_t *tmpnode1, *tmpnode2;
 	vec3_t normal;
 	float dist;
 
-	if (AAS_FindBestAreaSplitPlane(tmpnode->tmparea, normal, &dist))
-	{
-		qprintf("\r%6d", ++numgravitationalsubdivisions);
+	if ( AAS_FindBestAreaSplitPlane( tmpnode->tmparea, normal, &dist ) ) {
+		qprintf( "\r%6d", ++numgravitationalsubdivisions );
 		//
-		planenum = FindFloatPlane(normal, dist);
+		planenum = FindFloatPlane( normal, dist );
 		//split the area
-		AAS_SplitArea(tmpnode->tmparea, planenum, &frontarea, &backarea);
+		AAS_SplitArea( tmpnode->tmparea, planenum, &frontarea, &backarea );
 		//
 		tmpnode->tmparea = NULL;
-		tmpnode->planenum = FindFloatPlane(normal, dist);
+		tmpnode->planenum = FindFloatPlane( normal, dist );
 		//
 		tmpnode1 = AAS_AllocTmpNode();
 		tmpnode1->planenum = 0;
@@ -442,8 +466,8 @@ tmp_node_t *AAS_SubdivideArea_r(tmp_node_t *tmpnode)
 		tmpnode2->planenum = 0;
 		tmpnode2->tmparea = backarea;
 		//subdivide the areas created by splitting recursively
-		tmpnode->children[0] = AAS_SubdivideArea_r(tmpnode1);
-		tmpnode->children[1] = AAS_SubdivideArea_r(tmpnode2);
+		tmpnode->children[0] = AAS_SubdivideArea_r( tmpnode1 );
+		tmpnode->children[1] = AAS_SubdivideArea_r( tmpnode2 );
 	} //end if
 	return tmpnode;
 } //end of the function AAS_SubdivideArea_r
@@ -453,15 +477,18 @@ tmp_node_t *AAS_SubdivideArea_r(tmp_node_t *tmpnode)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-tmp_node_t *AAS_GravitationalSubdivision_r(tmp_node_t *tmpnode)
-{
+tmp_node_t *AAS_GravitationalSubdivision_r( tmp_node_t *tmpnode ) {
 	//if this is a solid leaf
-	if (!tmpnode) return NULL;
+	if ( !tmpnode ) {
+		return NULL;
+	}
 	//negative so it's an area
-	if (tmpnode->tmparea) return AAS_SubdivideArea_r(tmpnode);
+	if ( tmpnode->tmparea ) {
+		return AAS_SubdivideArea_r( tmpnode );
+	}
 	//do the children recursively
-	tmpnode->children[0] = AAS_GravitationalSubdivision_r(tmpnode->children[0]);
-	tmpnode->children[1] = AAS_GravitationalSubdivision_r(tmpnode->children[1]);
+	tmpnode->children[0] = AAS_GravitationalSubdivision_r( tmpnode->children[0] );
+	tmpnode->children[1] = AAS_GravitationalSubdivision_r( tmpnode->children[1] );
 	return tmpnode;
 } //end of the function AAS_GravitationalSubdivision_r
 //===========================================================================
@@ -471,15 +498,14 @@ tmp_node_t *AAS_GravitationalSubdivision_r(tmp_node_t *tmpnode)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-void AAS_GravitationalSubdivision(void)
-{
-	Log_Write("AAS_GravitationalSubdivision\r\n");
+void AAS_GravitationalSubdivision( void ) {
+	Log_Write( "AAS_GravitationalSubdivision\r\n" );
 	numgravitationalsubdivisions = 0;
-	qprintf("%6i gravitational subdivisions", numgravitationalsubdivisions);
+	qprintf( "%6i gravitational subdivisions", numgravitationalsubdivisions );
 	//start with the head node
-	AAS_GravitationalSubdivision_r(tmpaasworld.nodes);
-	qprintf("\n");
-	Log_Write("%6i gravitational subdivisions\r\n", numgravitationalsubdivisions);
+	AAS_GravitationalSubdivision_r( tmpaasworld.nodes );
+	qprintf( "\n" );
+	Log_Write( "%6i gravitational subdivisions\r\n", numgravitationalsubdivisions );
 } //end of the function AAS_GravitationalSubdivision
 //===========================================================================
 //
@@ -487,16 +513,15 @@ void AAS_GravitationalSubdivision(void)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-tmp_node_t *AAS_RefreshLadderSubdividedTree_r(tmp_node_t *tmpnode, tmp_area_t *tmparea,
-												  tmp_node_t *tmpnode1, tmp_node_t *tmpnode2, int planenum)
-{
+tmp_node_t *AAS_RefreshLadderSubdividedTree_r( tmp_node_t *tmpnode, tmp_area_t *tmparea,
+											   tmp_node_t *tmpnode1, tmp_node_t *tmpnode2, int planenum ) {
 	//if this is a solid leaf
-	if (!tmpnode) return NULL;
+	if ( !tmpnode ) {
+		return NULL;
+	}
 	//negative so it's an area
-	if (tmpnode->tmparea)
-	{
-		if (tmpnode->tmparea == tmparea)
-		{
+	if ( tmpnode->tmparea ) {
+		if ( tmpnode->tmparea == tmparea ) {
 			tmpnode->tmparea = NULL;
 			tmpnode->planenum = planenum;
 			tmpnode->children[0] = tmpnode1;
@@ -504,11 +529,11 @@ tmp_node_t *AAS_RefreshLadderSubdividedTree_r(tmp_node_t *tmpnode, tmp_area_t *t
 		} //end if
 		return tmpnode;
 	} //end if
-	//do the children recursively
-	tmpnode->children[0] = AAS_RefreshLadderSubdividedTree_r(tmpnode->children[0],
-									tmparea, tmpnode1, tmpnode2, planenum);
-	tmpnode->children[1] = AAS_RefreshLadderSubdividedTree_r(tmpnode->children[1],
-									tmparea, tmpnode1, tmpnode2, planenum);
+	  //do the children recursively
+	tmpnode->children[0] = AAS_RefreshLadderSubdividedTree_r( tmpnode->children[0],
+															  tmparea, tmpnode1, tmpnode2, planenum );
+	tmpnode->children[1] = AAS_RefreshLadderSubdividedTree_r( tmpnode->children[1],
+															  tmparea, tmpnode1, tmpnode2, planenum );
 	return tmpnode;
 } //end of the function AAS_RefreshLadderSubdividedTree_r
 //===========================================================================
@@ -520,8 +545,7 @@ tmp_node_t *AAS_RefreshLadderSubdividedTree_r(tmp_node_t *tmpnode, tmp_area_t *t
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-tmp_node_t *AAS_LadderSubdivideArea_r(tmp_node_t *tmpnode)
-{
+tmp_node_t *AAS_LadderSubdivideArea_r( tmp_node_t *tmpnode ) {
 	int side1, i, planenum;
 	int foundladderface, foundgroundface;
 	float dist;
@@ -534,73 +558,78 @@ tmp_node_t *AAS_LadderSubdivideArea_r(tmp_node_t *tmpnode)
 
 	tmparea = tmpnode->tmparea;
 	//skip areas with a liquid
-	if (tmparea->contents & (AREACONTENTS_WATER
-									| AREACONTENTS_LAVA
-									| AREACONTENTS_SLIME)) return tmpnode;
+	if ( tmparea->contents & ( AREACONTENTS_WATER
+							   | AREACONTENTS_LAVA
+							   | AREACONTENTS_SLIME ) ) {
+		return tmpnode;
+	}
 	//must be possible to stand in the area
-	if (!(tmparea->presencetype & PRESENCE_NORMAL)) return tmpnode;
+	if ( !( tmparea->presencetype & PRESENCE_NORMAL ) ) {
+		return tmpnode;
+	}
 	//
 	foundladderface = false;
 	foundgroundface = false;
 	lowestpoint[2] = 99999;
 	//
-	for (face1 = tmparea->tmpfaces; face1; face1 = face1->next[side1])
+	for ( face1 = tmparea->tmpfaces; face1; face1 = face1->next[side1] )
 	{
 		//side of the face the area is on
 		side1 = face1->frontarea != tmparea;
 		//if the face is a ladder face
-		if (face1->faceflags & FACE_LADDER)
-		{
+		if ( face1->faceflags & FACE_LADDER ) {
 			plane = &mapplanes[face1->planenum];
 			//the ladder face plane should be pretty much vertical
-			if (DotProduct(plane->normal, normal) > -0.1)
-			{
+			if ( DotProduct( plane->normal, normal ) > -0.1 ) {
 				foundladderface = true;
 				//find lowest point
-				for (i = 0; i < face1->winding->numpoints; i++)
+				for ( i = 0; i < face1->winding->numpoints; i++ )
 				{
-					if (face1->winding->p[i][2] < lowestpoint[2])
-					{
-						VectorCopy(face1->winding->p[i], lowestpoint);
+					if ( face1->winding->p[i][2] < lowestpoint[2] ) {
+						VectorCopy( face1->winding->p[i], lowestpoint );
 					} //end if
 				} //end for
 			} //end if
 		} //end if
-		else if (face1->faceflags & FACE_GROUND)
-		{
+		else if ( face1->faceflags & FACE_GROUND ) {
 			foundgroundface = true;
 		} //end else if
 	} //end for
+	  //
+	if ( ( !foundladderface ) || ( !foundgroundface ) ) {
+		return tmpnode;
+	}
 	//
-	if ((!foundladderface) || (!foundgroundface)) return tmpnode;
-	//
-	for (face1 = tmparea->tmpfaces; face1; face1 = face1->next[side1])
+	for ( face1 = tmparea->tmpfaces; face1; face1 = face1->next[side1] )
 	{
 		//side of the face the area is on
 		side1 = face1->frontarea != tmparea;
 		//if the face isn't a ground face
-		if (!(face1->faceflags & FACE_GROUND)) continue;
+		if ( !( face1->faceflags & FACE_GROUND ) ) {
+			continue;
+		}
 		//the ground plane
 		plane = &mapplanes[face1->planenum];
 		//get the difference between the ground plane and the lowest point
-		dist = DotProduct(plane->normal, lowestpoint) - plane->dist;
+		dist = DotProduct( plane->normal, lowestpoint ) - plane->dist;
 		//if the lowest point is very near one of the ground planes
-		if (dist > -1 && dist < 1)
-		{
+		if ( dist > -1 && dist < 1 ) {
 			return tmpnode;
 		} //end if
 	} //end for
+	  //
+	dist = DotProduct( normal, lowestpoint );
+	planenum = FindFloatPlane( normal, dist );
 	//
-	dist = DotProduct(normal, lowestpoint);
-	planenum = FindFloatPlane(normal, dist);
-	//
-	w = AAS_SplitWinding(tmparea, planenum);
-	if (!w) return tmpnode;
-	FreeWinding(w);
+	w = AAS_SplitWinding( tmparea, planenum );
+	if ( !w ) {
+		return tmpnode;
+	}
+	FreeWinding( w );
 	//split the area with a horizontal plane through the lowest point
-	qprintf("\r%6d", ++numladdersubdivisions);
+	qprintf( "\r%6d", ++numladdersubdivisions );
 	//
-	AAS_SplitArea(tmparea, planenum, &frontarea, &backarea);
+	AAS_SplitArea( tmparea, planenum, &frontarea, &backarea );
 	//
 	tmpnode->tmparea = NULL;
 	tmpnode->planenum = planenum;
@@ -613,10 +642,10 @@ tmp_node_t *AAS_LadderSubdivideArea_r(tmp_node_t *tmpnode)
 	tmpnode2->planenum = 0;
 	tmpnode2->tmparea = backarea;
 	//subdivide the areas created by splitting recursively
-	tmpnode->children[0] = AAS_LadderSubdivideArea_r(tmpnode1);
-	tmpnode->children[1] = AAS_LadderSubdivideArea_r(tmpnode2);
+	tmpnode->children[0] = AAS_LadderSubdivideArea_r( tmpnode1 );
+	tmpnode->children[1] = AAS_LadderSubdivideArea_r( tmpnode2 );
 	//refresh the tree
-	AAS_RefreshLadderSubdividedTree_r(tmpaasworld.nodes, tmparea, tmpnode1, tmpnode2, planenum);
+	AAS_RefreshLadderSubdividedTree_r( tmpaasworld.nodes, tmparea, tmpnode1, tmpnode2, planenum );
 	//
 	return tmpnode;
 } //end of the function AAS_LadderSubdivideArea_r
@@ -626,15 +655,18 @@ tmp_node_t *AAS_LadderSubdivideArea_r(tmp_node_t *tmpnode)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-tmp_node_t *AAS_LadderSubdivision_r(tmp_node_t *tmpnode)
-{
+tmp_node_t *AAS_LadderSubdivision_r( tmp_node_t *tmpnode ) {
 	//if this is a solid leaf
-	if (!tmpnode) return 0;
+	if ( !tmpnode ) {
+		return 0;
+	}
 	//negative so it's an area
-	if (tmpnode->tmparea) return AAS_LadderSubdivideArea_r(tmpnode);
+	if ( tmpnode->tmparea ) {
+		return AAS_LadderSubdivideArea_r( tmpnode );
+	}
 	//do the children recursively
-	tmpnode->children[0] = AAS_LadderSubdivision_r(tmpnode->children[0]);
-	tmpnode->children[1] = AAS_LadderSubdivision_r(tmpnode->children[1]);
+	tmpnode->children[0] = AAS_LadderSubdivision_r( tmpnode->children[0] );
+	tmpnode->children[1] = AAS_LadderSubdivision_r( tmpnode->children[1] );
 	return tmpnode;
 } //end of the function AAS_LadderSubdivision_r
 //===========================================================================
@@ -643,14 +675,14 @@ tmp_node_t *AAS_LadderSubdivision_r(tmp_node_t *tmpnode)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-void AAS_LadderSubdivision(void)
-{
-	Log_Write("AAS_LadderSubdivision\r\n");
+void AAS_LadderSubdivision( void ) {
+	Log_Write( "AAS_LadderSubdivision\r\n" );
 	numladdersubdivisions = 0;
-	qprintf("%6i ladder subdivisions", numladdersubdivisions);
+	qprintf( "%6i ladder subdivisions", numladdersubdivisions );
 	//start with the head node
-	AAS_LadderSubdivision_r(tmpaasworld.nodes);
+	AAS_LadderSubdivision_r( tmpaasworld.nodes );
 	//
-	qprintf("\n");
-	Log_Write("%6i ladder subdivisions\r\n", numladdersubdivisions);
+	qprintf( "\n" );
+	Log_Write( "%6i ladder subdivisions\r\n", numladdersubdivisions );
 } //end of the function AAS_LadderSubdivision
+

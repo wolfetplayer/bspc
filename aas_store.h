@@ -1,39 +1,54 @@
 /*
 ===========================================================================
-Copyright (C) 1999-2005 Id Software, Inc.
 
-This file is part of Quake III Arena source code.
+Return to Castle Wolfenstein single player GPL Source Code
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-Quake III Arena source code is free software; you can redistribute it
-and/or modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2 of the License,
-or (at your option) any later version.
+This file is part of the Return to Castle Wolfenstein single player GPL Source Code (RTCW SP Source Code).  
 
-Quake III Arena source code is distributed in the hope that it will be
-useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+RTCW SP Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+RTCW SP Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+along with RTCW SP Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the RTCW SP Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the RTCW SP Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
 ===========================================================================
 */
 
-#define AAS_MAX_BBOXES						5
-#define AAS_MAX_VERTEXES					512000
-#define AAS_MAX_PLANES						65536
-#define AAS_MAX_EDGES						512000
-#define AAS_MAX_EDGEINDEXSIZE				512000
-#define AAS_MAX_FACES						512000
-#define AAS_MAX_FACEINDEXSIZE				512000
-#define AAS_MAX_AREAS						65536
-#define AAS_MAX_AREASETTINGS				65536
-#define AAS_MAX_REACHABILITYSIZE			65536
-#define AAS_MAX_NODES						256000
-#define AAS_MAX_PORTALS						65536
-#define AAS_MAX_PORTALINDEXSIZE				65536
-#define AAS_MAX_CLUSTERS					65536
+//===========================================================================
+//
+// Name:         aas_store.h
+// Function:
+// Programmer:   Mr Elusive (MrElusive@demigod.demon.nl)
+// Last update:  1997-12-04
+// Tab Size:     3
+//===========================================================================
+
+#define AAS_MAX_BBOXES                      5
+#define AAS_MAX_VERTEXES                    512000
+#define AAS_MAX_PLANES                      65536
+#define AAS_MAX_EDGES                       512000
+#define AAS_MAX_EDGEINDEXSIZE               512000
+#define AAS_MAX_FACES                       512000
+#define AAS_MAX_FACEINDEXSIZE               512000
+#define AAS_MAX_AREAS                       65536
+#define AAS_MAX_AREASETTINGS                65536
+#define AAS_MAX_REACHABILITYSIZE            65536
+#define AAS_MAX_NODES                       256000
+#define AAS_MAX_PORTALS                     65536
+#define AAS_MAX_PORTALINDEXSIZE             65536
+#define AAS_MAX_CLUSTERS                    65536
 
 #define BSPCINCLUDE
 #include "botlib/be_aas.h"
@@ -93,15 +108,19 @@ typedef struct bspc_aas_s
 } bspc_aas_t;
 
 extern bspc_aas_t aasworld;
-//*/
+//
+*/
 
-extern aas_t aasworld;
+// Ridah
+extern aas_t aasworlds[1];
+extern aas_t *aasworld;
+// done.
 
 //stores the AAS file from the temporary AAS
-void AAS_StoreFile(char *filename);
+void AAS_StoreFile( char *filename );
 //returns a number of the given plane
-qboolean AAS_FindPlane(vec3_t normal, float dist, int *planenum);
+qboolean AAS_FindPlane( vec3_t normal, float dist, int *planenum );
 //allocates the maximum AAS memory for storage
-void AAS_AllocMaxAAS(void);
+void AAS_AllocMaxAAS( void );
 //frees the maximum AAS memory for storage
-void AAS_FreeMaxAAS(void);
+void AAS_FreeMaxAAS( void );

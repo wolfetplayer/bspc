@@ -1,24 +1,42 @@
 /*
 ===========================================================================
-Copyright (C) 1999-2005 Id Software, Inc.
 
-This file is part of Quake III Arena source code.
+Return to Castle Wolfenstein single player GPL Source Code
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-Quake III Arena source code is free software; you can redistribute it
-and/or modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2 of the License,
-or (at your option) any later version.
+This file is part of the Return to Castle Wolfenstein single player GPL Source Code (RTCW SP Source Code).  
 
-Quake III Arena source code is distributed in the hope that it will be
-useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+RTCW SP Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+RTCW SP Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+along with RTCW SP Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the RTCW SP Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the RTCW SP Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
 ===========================================================================
 */
+
+//===========================================================================
+//
+// Name:				Brush CSG
+// Function:
+// Programmer(s):	id Software & Mr Elusive (MrElusive@demigod.demon.nl)
+// Last update:	1997-12-04
+// Tab Size:		3
+// Notes:			Microsoft Visual C++ optimizations:
+//						"global optimization" or "full optimization" results
+//						in micro brushes??
+//===========================================================================
 
 #include "qbsp.h"
 
@@ -39,44 +57,42 @@ int maxplanenums[3];
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-void CheckBSPBrush(bspbrush_t *brush)
-{
+void CheckBSPBrush( bspbrush_t *brush ) {
 	int i, j;
 	plane_t *plane1, *plane2;
 
 	//check if the brush is convex... flipped planes make a brush non-convex
-	for (i = 0; i < brush->numsides; i++)
+	for ( i = 0; i < brush->numsides; i++ )
 	{
-		for (j = 0; j < brush->numsides; j++)
+		for ( j = 0; j < brush->numsides; j++ )
 		{
-			if (i == j) continue;
+			if ( i == j ) {
+				continue;
+			}
 			plane1 = &mapplanes[brush->sides[i].planenum];
 			plane2 = &mapplanes[brush->sides[j].planenum];
 			//
-			if (WindingsNonConvex(brush->sides[i].winding,
+			if ( WindingsNonConvex( brush->sides[i].winding,
 									brush->sides[j].winding,
 									plane1->normal, plane2->normal,
-									plane1->dist, plane2->dist))
-			{
-				Log_Print("non convex brush");
+									plane1->dist, plane2->dist ) ) {
+				Log_Print( "non convex brush" );
 				break;
 			} //end if
 		} //end for
 	} //end for
-	BoundBrush(brush);
+	BoundBrush( brush );
 	//check for out of bound brushes
-	for (i = 0; i < 3; i++)
+	for ( i = 0; i < 3; i++ )
 	{
-		if (brush->mins[i] < -MAX_MAP_BOUNDS || brush->maxs[i] > MAX_MAP_BOUNDS)
-		{
-			Log_Print("brush: bounds out of range\n");
-			Log_Print("ob->mins[%d] = %f, ob->maxs[%d] = %f\n", i, brush->mins[i], i, brush->maxs[i]);
+		if ( brush->mins[i] < -MAX_MAP_BOUNDS || brush->maxs[i] > MAX_MAP_BOUNDS ) {
+			Log_Print( "brush: bounds out of range\n" );
+			Log_Print( "ob->mins[%d] = %f, ob->maxs[%d] = %f\n", i, brush->mins[i], i, brush->maxs[i] );
 			break;
 		} //end if
-		if (brush->mins[i] > MAX_MAP_BOUNDS || brush->maxs[i] < -MAX_MAP_BOUNDS)
-		{
-			Log_Print("brush: no visible sides on brush\n");
-			Log_Print("ob->mins[%d] = %f, ob->maxs[%d] = %f\n", i, brush->mins[i], i, brush->maxs[i]);
+		if ( brush->mins[i] > MAX_MAP_BOUNDS || brush->maxs[i] < -MAX_MAP_BOUNDS ) {
+			Log_Print( "brush: no visible sides on brush\n" );
+			Log_Print( "ob->mins[%d] = %f, ob->maxs[%d] = %f\n", i, brush->mins[i], i, brush->maxs[i] );
 			break;
 		} //end if
 	} //end for
@@ -87,21 +103,22 @@ void CheckBSPBrush(bspbrush_t *brush)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-void BSPBrushWindings(bspbrush_t *brush)
-{
+void BSPBrushWindings( bspbrush_t *brush ) {
 	int i, j;
 	winding_t *w;
 	plane_t *plane;
 
-	for (i = 0; i < brush->numsides; i++)
+	for ( i = 0; i < brush->numsides; i++ )
 	{
 		plane = &mapplanes[brush->sides[i].planenum];
-		w = BaseWindingForPlane(plane->normal, plane->dist);
-		for (j = 0; j < brush->numsides && w; j++)
+		w = BaseWindingForPlane( plane->normal, plane->dist );
+		for ( j = 0; j < brush->numsides && w; j++ )
 		{
-			if (i == j) continue;
-			plane = &mapplanes[brush->sides[j].planenum^1];
-			ChopWindingInPlace(&w, plane->normal, plane->dist, 0); //CLIP_EPSILON);
+			if ( i == j ) {
+				continue;
+			}
+			plane = &mapplanes[brush->sides[j].planenum ^ 1];
+			ChopWindingInPlace( &w, plane->normal, plane->dist, 0 ); //CLIP_EPSILON);
 		} //end for
 		brush->sides[i].winding = w;
 	} //end for
@@ -113,153 +130,173 @@ void BSPBrushWindings(bspbrush_t *brush)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-bspbrush_t *TryMergeBrushes(bspbrush_t *brush1, bspbrush_t *brush2)
-{
+bspbrush_t *TryMergeBrushes( bspbrush_t *brush1, bspbrush_t *brush2 ) {
 	int i, j, k, n, shared;
 	side_t *side1, *side2, *cs;
 	plane_t *plane1, *plane2;
 	bspbrush_t *newbrush;
 
 	//check for bounding box overlapp
-	for (i = 0; i < 3; i++)
+	for ( i = 0; i < 3; i++ )
 	{
-		if (brush1->mins[i] > brush2->maxs[i] + 2
-				|| brush1->maxs[i] < brush2->mins[i] - 2)
-		{
+		if ( brush1->mins[i] > brush2->maxs[i] + 2
+			 || brush1->maxs[i] < brush2->mins[i] - 2 ) {
 			return NULL;
 		} //end if
 	} //end for
-	//
+	  //
 	shared = 0;
 	//check if the brush is convex... flipped planes make a brush non-convex
-	for (i = 0; i < brush1->numsides; i++)
+	for ( i = 0; i < brush1->numsides; i++ )
 	{
 		side1 = &brush1->sides[i];
 		//don't check the "shared" sides
-		for (k = 0; k < brush2->numsides; k++)
+		for ( k = 0; k < brush2->numsides; k++ )
 		{
 			side2 = &brush2->sides[k];
-			if (side1->planenum == (side2->planenum^1))
-			{
+			if ( side1->planenum == ( side2->planenum ^ 1 ) ) {
 				shared++;
 				//there may only be ONE shared side
-				if (shared > 1) return NULL;
+				if ( shared > 1 ) {
+					return NULL;
+				}
 				break;
 			} //end if
 		} //end for
-		if (k < brush2->numsides) continue;
+		if ( k < brush2->numsides ) {
+			continue;
+		}
 		//
-		for (j = 0; j < brush2->numsides; j++)
+		for ( j = 0; j < brush2->numsides; j++ )
 		{
 			side2 = &brush2->sides[j];
 			//don't check the "shared" sides
-			for (n = 0; n < brush1->numsides; n++)
+			for ( n = 0; n < brush1->numsides; n++ )
 			{
 				side1 = &brush1->sides[n];
-				if (side1->planenum == (side2->planenum^1)) break;
+				if ( side1->planenum == ( side2->planenum ^ 1 ) ) {
+					break;
+				}
 			} //end for
-			if (n < brush1->numsides) continue;
+			if ( n < brush1->numsides ) {
+				continue;
+			}
 			//
 			side1 = &brush1->sides[i];
 			//if the side is in the same plane
 			//*
-			if (side1->planenum == side2->planenum)
-			{
-				if (side1->texinfo != TEXINFO_NODE &&
-					side2->texinfo != TEXINFO_NODE &&
-					side1->texinfo != side2->texinfo) return NULL;
+			if ( side1->planenum == side2->planenum ) {
+				if ( side1->texinfo != TEXINFO_NODE &&
+					 side2->texinfo != TEXINFO_NODE &&
+					 side1->texinfo != side2->texinfo ) {
+					return NULL;
+				}
 				continue;
 			} //end if
-			//
+			  //
 			plane1 = &mapplanes[side1->planenum];
 			plane2 = &mapplanes[side2->planenum];
 			//
-			if (WindingsNonConvex(side1->winding, side2->winding,
+			if ( WindingsNonConvex( side1->winding, side2->winding,
 									plane1->normal, plane2->normal,
-									plane1->dist, plane2->dist))
-			{
+									plane1->dist, plane2->dist ) ) {
 				return NULL;
 			} //end if
 		} //end for
 	} //end for
-	newbrush = AllocBrush(brush1->numsides + brush2->numsides);
+	newbrush = AllocBrush( brush1->numsides + brush2->numsides );
 	newbrush->original = brush1->original;
 	newbrush->numsides = 0;
 	//newbrush->side = brush1->side;	//brush contents
 	//fix texinfos for sides lying in the same plane
-	for (i = 0; i < brush1->numsides; i++)
+	for ( i = 0; i < brush1->numsides; i++ )
 	{
 		side1 = &brush1->sides[i];
 		//
-		for (n = 0; n < brush2->numsides; n++)
+		for ( n = 0; n < brush2->numsides; n++ )
 		{
 			side2 = &brush2->sides[n];
 			//if both sides are in the same plane get the texinfo right
-			if (side1->planenum == side2->planenum)
-			{
-				if (side1->texinfo == TEXINFO_NODE) side1->texinfo = side2->texinfo;
-				if (side2->texinfo == TEXINFO_NODE) side2->texinfo = side1->texinfo;
+			if ( side1->planenum == side2->planenum ) {
+				if ( side1->texinfo == TEXINFO_NODE ) {
+					side1->texinfo = side2->texinfo;
+				}
+				if ( side2->texinfo == TEXINFO_NODE ) {
+					side2->texinfo = side1->texinfo;
+				}
 			} //end if
 		} //end for
 	} //end for
-	//
-	for (i = 0; i < brush1->numsides; i++)
+	  //
+	for ( i = 0; i < brush1->numsides; i++ )
 	{
 		side1 = &brush1->sides[i];
 		//don't add the "shared" sides
-		for (n = 0; n < brush2->numsides; n++)
+		for ( n = 0; n < brush2->numsides; n++ )
 		{
 			side2 = &brush2->sides[n];
-			if (side1->planenum == (side2->planenum ^ 1)) break;
+			if ( side1->planenum == ( side2->planenum ^ 1 ) ) {
+				break;
+			}
 		} //end for
-		if (n < brush2->numsides) continue;
+		if ( n < brush2->numsides ) {
+			continue;
+		}
 		//
-		for (n = 0; n < newbrush->numsides; n++)
+		for ( n = 0; n < newbrush->numsides; n++ )
 		{
 			cs = &newbrush->sides[n];
-			if (cs->planenum == side1->planenum)
-			{
-				Log_Print("brush duplicate plane\n");
+			if ( cs->planenum == side1->planenum ) {
+				Log_Print( "brush duplicate plane\n" );
 				break;
 			} //end if
 		} //end if
-		if (n < newbrush->numsides) continue;
+		if ( n < newbrush->numsides ) {
+			continue;
+		}
 		//add this side
 		cs = &newbrush->sides[newbrush->numsides];
 		newbrush->numsides++;
 		*cs = *side1;
 	} //end for
-	for (j = 0; j < brush2->numsides; j++)
+	for ( j = 0; j < brush2->numsides; j++ )
 	{
 		side2 = &brush2->sides[j];
-		for (n = 0; n < brush1->numsides; n++)
+		for ( n = 0; n < brush1->numsides; n++ )
 		{
 			side1 = &brush1->sides[n];
 			//if the side is in the same plane
-			if (side2->planenum == side1->planenum) break;
+			if ( side2->planenum == side1->planenum ) {
+				break;
+			}
 			//don't add the "shared" sides
-			if (side2->planenum == (side1->planenum ^ 1)) break;
+			if ( side2->planenum == ( side1->planenum ^ 1 ) ) {
+				break;
+			}
 		} //end for
-		if (n < brush1->numsides) continue;
+		if ( n < brush1->numsides ) {
+			continue;
+		}
 		//
-		for (n = 0; n < newbrush->numsides; n++)
+		for ( n = 0; n < newbrush->numsides; n++ )
 		{
 			cs = &newbrush->sides[n];
-			if (cs->planenum == side2->planenum)
-			{
-				Log_Print("brush duplicate plane\n");
+			if ( cs->planenum == side2->planenum ) {
+				Log_Print( "brush duplicate plane\n" );
 				break;
 			} //end if
 		} //end if
-		if (n < newbrush->numsides) continue;
+		if ( n < newbrush->numsides ) {
+			continue;
+		}
 		//add this side
 		cs = &newbrush->sides[newbrush->numsides];
 		newbrush->numsides++;
 		*cs = *side2;
 	} //end for
-	BSPBrushWindings(newbrush);
-	BoundBrush(newbrush);
-	CheckBSPBrush(newbrush);
+	BSPBrushWindings( newbrush );
+	BoundBrush( newbrush );
+	CheckBSPBrush( newbrush );
 	return newbrush;
 } //end of the function TryMergeBrushes
 //===========================================================================
@@ -268,52 +305,56 @@ bspbrush_t *TryMergeBrushes(bspbrush_t *brush1, bspbrush_t *brush2)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-bspbrush_t *MergeBrushes(bspbrush_t *brushlist)
-{
+bspbrush_t *MergeBrushes( bspbrush_t *brushlist ) {
 	int nummerges, merged;
 	bspbrush_t *b1, *b2, *tail, *newbrush, *newbrushlist;
 	bspbrush_t *lastb2;
 
-	if (!brushlist) return NULL;
+	if ( !brushlist ) {
+		return NULL;
+	}
 
-	qprintf("%5d brushes merged", nummerges = 0);
+	qprintf( "%5d brushes merged", nummerges = 0 );
 	do
 	{
-		for (tail = brushlist; tail; tail = tail->next)
+		for ( tail = brushlist; tail; tail = tail->next )
 		{
-			if (!tail->next) break;
+			if ( !tail->next ) {
+				break;
+			}
 		} //end for
 		merged = 0;
 		newbrushlist = NULL;
-		for (b1 = brushlist; b1; b1 = brushlist)
+		for ( b1 = brushlist; b1; b1 = brushlist )
 		{
 			lastb2 = b1;
-			for (b2 = b1->next; b2; b2 = b2->next)
+			for ( b2 = b1->next; b2; b2 = b2->next )
 			{
 				//if the brushes don't have the same contents
-				if (b1->original->contents != b2->original->contents ||
-					b1->original->expansionbbox != b2->original->expansionbbox) newbrush = NULL;
-				else newbrush = TryMergeBrushes(b1, b2);
-				if (newbrush)
-				{
+				if ( b1->original->contents != b2->original->contents ||
+					 b1->original->expansionbbox != b2->original->expansionbbox ) {
+					newbrush = NULL;
+				} else { newbrush = TryMergeBrushes( b1, b2 );}
+				if ( newbrush ) {
 					tail->next = newbrush;
 					lastb2->next = b2->next;
 					brushlist = brushlist->next;
-					FreeBrush(b1);
-					FreeBrush(b2);
-					for (tail = brushlist; tail; tail = tail->next)
+					FreeBrush( b1 );
+					FreeBrush( b2 );
+					for ( tail = brushlist; tail; tail = tail->next )
 					{
-						if (!tail->next) break;
+						if ( !tail->next ) {
+							break;
+						}
 					} //end for
 					merged++;
-					qprintf("\r%5d", nummerges++);
+					qprintf( "\r%5d", nummerges++ );
 					break;
 				} //end if
 				lastb2 = b2;
 			} //end for
-			//if b1 can't be merged with any of the other brushes
-			if (!b2)
-			{
+			  //if b1 can't be merged with any of the other brushes
+			if ( !b2 ) {
 				brushlist = brushlist->next;
 				//keep b1
 				b1->next = newbrushlist;
@@ -321,8 +362,8 @@ bspbrush_t *MergeBrushes(bspbrush_t *brushlist)
 			} //end else
 		} //end for
 		brushlist = newbrushlist;
-	} while(merged);
-	qprintf("\n");
+	} while ( merged );
+	qprintf( "\n" );
 	return newbrushlist;
 } //end of the function MergeBrushes
 //===========================================================================
@@ -331,15 +372,16 @@ bspbrush_t *MergeBrushes(bspbrush_t *brushlist)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-void SplitBrush2 (bspbrush_t *brush, int planenum,
-	bspbrush_t **front, bspbrush_t **back)
-{
-	SplitBrush (brush, planenum, front, back);
+void SplitBrush2( bspbrush_t *brush, int planenum,
+				  bspbrush_t **front, bspbrush_t **back ) {
+	SplitBrush( brush, planenum, front, back );
 #if 0
-	if (*front && (*front)->sides[(*front)->numsides-1].texinfo == -1)
-		(*front)->sides[(*front)->numsides-1].texinfo = (*front)->sides[0].texinfo;	// not -1
-	if (*back && (*back)->sides[(*back)->numsides-1].texinfo == -1)
-		(*back)->sides[(*back)->numsides-1].texinfo = (*back)->sides[0].texinfo;	// not -1
+	if ( *front && ( *front )->sides[( *front )->numsides - 1].texinfo == -1 ) {
+		( *front )->sides[( *front )->numsides - 1].texinfo = ( *front )->sides[0].texinfo; // not -1
+	}
+	if ( *back && ( *back )->sides[( *back )->numsides - 1].texinfo == -1 ) {
+		( *back )->sides[( *back )->numsides - 1].texinfo = ( *back )->sides[0].texinfo;    // not -1
+	}
 #endif
 } //end of the function SplitBrush2
 //===========================================================================
@@ -351,32 +393,31 @@ void SplitBrush2 (bspbrush_t *brush, int planenum,
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-bspbrush_t *SubtractBrush (bspbrush_t *a, bspbrush_t *b)
-{	// a - b = out (list)
-	int		i;
-	bspbrush_t	*front, *back;
-	bspbrush_t	*out, *in;
+bspbrush_t *SubtractBrush( bspbrush_t *a, bspbrush_t *b ) { // a - b = out (list)
+	int i;
+	bspbrush_t  *front, *back;
+	bspbrush_t  *out, *in;
 
 	in = a;
 	out = NULL;
-	for (i = 0; i < b->numsides && in; i++)
+	for ( i = 0; i < b->numsides && in; i++ )
 	{
-		SplitBrush2(in, b->sides[i].planenum, &front, &back);
-		if (in != a) FreeBrush(in);
-		if (front)
-		{	// add to list
+		SplitBrush2( in, b->sides[i].planenum, &front, &back );
+		if ( in != a ) {
+			FreeBrush( in );
+		}
+		if ( front ) { // add to list
 			front->next = out;
 			out = front;
 		} //end if
 		in = back;
 	} //end for
-	if (in)
-	{
-		FreeBrush (in);
+	if ( in ) {
+		FreeBrush( in );
 	} //end if
 	else
-	{	// didn't really intersect
-		FreeBrushList (out);
+	{   // didn't really intersect
+		FreeBrushList( out );
 		return a;
 	} //end else
 	return out;
@@ -391,22 +432,27 @@ bspbrush_t *SubtractBrush (bspbrush_t *a, bspbrush_t *b)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-bspbrush_t *IntersectBrush (bspbrush_t *a, bspbrush_t *b)
-{
-	int		i;
-	bspbrush_t	*front, *back;
-	bspbrush_t	*in;
+bspbrush_t *IntersectBrush( bspbrush_t *a, bspbrush_t *b ) {
+	int i;
+	bspbrush_t  *front, *back;
+	bspbrush_t  *in;
 
 	in = a;
-	for (i=0 ; i<b->numsides && in ; i++)
+	for ( i = 0 ; i < b->numsides && in ; i++ )
 	{
-		SplitBrush2(in, b->sides[i].planenum, &front, &back);
-		if (in != a) FreeBrush(in);
-		if (front) FreeBrush(front);
+		SplitBrush2( in, b->sides[i].planenum, &front, &back );
+		if ( in != a ) {
+			FreeBrush( in );
+		}
+		if ( front ) {
+			FreeBrush( front );
+		}
 		in = back;
 	} //end for
 
-	if (in == a) return NULL;
+	if ( in == a ) {
+		return NULL;
+	}
 
 	in->next = NULL;
 	return in;
@@ -419,28 +465,29 @@ bspbrush_t *IntersectBrush (bspbrush_t *a, bspbrush_t *b)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-qboolean BrushesDisjoint (bspbrush_t *a, bspbrush_t *b)
-{
-	int		i, j;
+qboolean BrushesDisjoint( bspbrush_t *a, bspbrush_t *b ) {
+	int i, j;
 
 	// check bounding boxes
-	for (i=0 ; i<3 ; i++)
-		if (a->mins[i] >= b->maxs[i]
-		|| a->maxs[i] <= b->mins[i])
-			return true;	// bounding boxes don't overlap
+	for ( i = 0 ; i < 3 ; i++ )
+		if ( a->mins[i] >= b->maxs[i]
+			 || a->maxs[i] <= b->mins[i] ) {
+			return true;
+		}                   // bounding boxes don't overlap
 
 	// check for opposing planes
-	for (i=0 ; i<a->numsides ; i++)
+	for ( i = 0 ; i < a->numsides ; i++ )
 	{
-		for (j=0 ; j<b->numsides ; j++)
+		for ( j = 0 ; j < b->numsides ; j++ )
 		{
-			if (a->sides[i].planenum ==
-			(b->sides[j].planenum^1) )
-				return true;	// opposite planes, so not touching
+			if ( a->sides[i].planenum ==
+				 ( b->sides[j].planenum ^ 1 ) ) {
+				return true;    // opposite planes, so not touching
+			}
 		}
 	}
 
-	return false;	// might intersect
+	return false;   // might intersect
 } //end of the function BrushesDisjoint
 //===========================================================================
 // Returns a content word for the intersection of two brushes.
@@ -451,13 +498,14 @@ qboolean BrushesDisjoint (bspbrush_t *a, bspbrush_t *b)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-int IntersectionContents (int c1, int c2)
-{
+int IntersectionContents( int c1, int c2 ) {
 	int out;
 
 	out = c1 | c2;
 
-	if (out & CONTENTS_SOLID) out = CONTENTS_SOLID;
+	if ( out & CONTENTS_SOLID ) {
+		out = CONTENTS_SOLID;
+	}
 
 	return out;
 } //end of the function IntersectionContents
@@ -468,42 +516,42 @@ int IntersectionContents (int c1, int c2)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-bspbrush_t *ClipBrushToBox(bspbrush_t *brush, vec3_t clipmins, vec3_t clipmaxs)
-{
-	int		i, j;
-	bspbrush_t	*front,	*back;
-	int		p;
+bspbrush_t *ClipBrushToBox( bspbrush_t *brush, vec3_t clipmins, vec3_t clipmaxs ) {
+	int i, j;
+	bspbrush_t  *front, *back;
+	int p;
 
-	for (j=0 ; j<2 ; j++)
+	for ( j = 0 ; j < 2 ; j++ )
 	{
-		if (brush->maxs[j] > clipmaxs[j])
-		{
-			SplitBrush (brush, maxplanenums[j], &front, &back);
-			if (front)
-				FreeBrush (front);
+		if ( brush->maxs[j] > clipmaxs[j] ) {
+			SplitBrush( brush, maxplanenums[j], &front, &back );
+			if ( front ) {
+				FreeBrush( front );
+			}
 			brush = back;
-			if (!brush)
+			if ( !brush ) {
 				return NULL;
+			}
 		}
-		if (brush->mins[j] < clipmins[j])
-		{
-			SplitBrush (brush, minplanenums[j], &front, &back);
-			if (back)
-				FreeBrush (back);
+		if ( brush->mins[j] < clipmins[j] ) {
+			SplitBrush( brush, minplanenums[j], &front, &back );
+			if ( back ) {
+				FreeBrush( back );
+			}
 			brush = front;
-			if (!brush)
+			if ( !brush ) {
 				return NULL;
+			}
 		}
 	}
 
 	// remove any colinear faces
 
-	for (i=0 ; i<brush->numsides ; i++)
+	for ( i = 0 ; i < brush->numsides ; i++ )
 	{
 		p = brush->sides[i].planenum & ~1;
-		if (p == maxplanenums[0] || p == maxplanenums[1] 
-			|| p == minplanenums[0] || p == minplanenums[1])
-		{
+		if ( p == maxplanenums[0] || p == maxplanenums[1]
+			 || p == minplanenums[0] || p == minplanenums[1] ) {
 			brush->sides[i].texinfo = TEXINFO_NODE;
 			brush->sides[i].flags &= ~SFL_VISIBLE;
 		}
@@ -516,81 +564,88 @@ bspbrush_t *ClipBrushToBox(bspbrush_t *brush, vec3_t clipmins, vec3_t clipmaxs)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-bspbrush_t *MakeBspBrushList(int startbrush, int endbrush,
-											vec3_t clipmins, vec3_t clipmaxs)
-{
-	mapbrush_t	*mb;
-	bspbrush_t	*brushlist, *newbrush;
-	int			i, j;
-	int			c_faces;
-	int			c_brushes;
-	int			numsides;
-	int			vis;
-	vec3_t		normal;
-	float		dist;
+bspbrush_t *MakeBspBrushList( int startbrush, int endbrush,
+							  vec3_t clipmins, vec3_t clipmaxs ) {
+	mapbrush_t  *mb;
+	bspbrush_t  *brushlist, *newbrush;
+	int i, j;
+	int c_faces;
+	int c_brushes;
+	int numsides;
+	int vis;
+	vec3_t normal;
+	float dist;
 
-	for (i=0 ; i<2 ; i++)
+	for ( i = 0 ; i < 2 ; i++ )
 	{
-		VectorClear (normal);
+		VectorClear( normal );
 		normal[i] = 1;
 		dist = clipmaxs[i];
-		maxplanenums[i] = FindFloatPlane(normal, dist);
+		maxplanenums[i] = FindFloatPlane( normal, dist );
 		dist = clipmins[i];
-		minplanenums[i] = FindFloatPlane(normal, dist);
+		minplanenums[i] = FindFloatPlane( normal, dist );
 	}
 
 	brushlist = NULL;
 	c_faces = 0;
 	c_brushes = 0;
 
-	for (i=startbrush ; i<endbrush ; i++)
+	for ( i = startbrush ; i < endbrush ; i++ )
 	{
 		mb = &mapbrushes[i];
 
 		numsides = mb->numsides;
-		if (!numsides)
+		if ( !numsides ) {
 			continue;
+		}
 
 		// make sure the brush has at least one face showing
 		vis = 0;
-		for (j=0 ; j<numsides ; j++)
-			if ((mb->original_sides[j].flags & SFL_VISIBLE) && mb->original_sides[j].winding)
+		for ( j = 0 ; j < numsides ; j++ )
+			if ( ( mb->original_sides[j].flags & SFL_VISIBLE ) && mb->original_sides[j].winding ) {
 				vis++;
+			}
 #if 0
-		if (!vis)
-			continue;	// no faces at all
+		if ( !vis ) {
+			continue;   // no faces at all
+		}
 #endif
 		// if the brush is outside the clip area, skip it
-		for (j=0 ; j<3 ; j++)
-			if (mb->mins[j] >= clipmaxs[j]
-			|| mb->maxs[j] <= clipmins[j])
-			break;
-		if (j != 3)
+		for ( j = 0 ; j < 3 ; j++ )
+			if ( mb->mins[j] >= clipmaxs[j]
+				 || mb->maxs[j] <= clipmins[j] ) {
+				break;
+			}
+		if ( j != 3 ) {
 			continue;
+		}
 
 		//
 		// make a copy of the brush
 		//
-		newbrush = AllocBrush (mb->numsides);
+		newbrush = AllocBrush( mb->numsides );
 		newbrush->original = mb;
 		newbrush->numsides = mb->numsides;
-		memcpy (newbrush->sides, mb->original_sides, numsides*sizeof(side_t));
-		for (j=0 ; j<numsides ; j++)
+		memcpy( newbrush->sides, mb->original_sides, numsides * sizeof( side_t ) );
+		for ( j = 0 ; j < numsides ; j++ )
 		{
-			if (newbrush->sides[j].winding)
-				newbrush->sides[j].winding = CopyWinding (newbrush->sides[j].winding);
-			if (newbrush->sides[j].surf & SURF_HINT)
-				newbrush->sides[j].flags |= SFL_VISIBLE;	// hints are always visible
+			if ( newbrush->sides[j].winding ) {
+				newbrush->sides[j].winding = CopyWinding( newbrush->sides[j].winding );
+			}
+			if ( newbrush->sides[j].surf & SURF_HINT ) {
+				newbrush->sides[j].flags |= SFL_VISIBLE;    // hints are always visible
+			}
 		}
-		VectorCopy (mb->mins, newbrush->mins);
-		VectorCopy (mb->maxs, newbrush->maxs);
+		VectorCopy( mb->mins, newbrush->mins );
+		VectorCopy( mb->maxs, newbrush->maxs );
 
 		//
 		// carve off anything outside the clip box
 		//
-		newbrush = ClipBrushToBox (newbrush, clipmins, clipmaxs);
-		if (!newbrush)
+		newbrush = ClipBrushToBox( newbrush, clipmins, clipmaxs );
+		if ( !newbrush ) {
 			continue;
+		}
 
 		c_faces += vis;
 		c_brushes++;
@@ -607,12 +662,11 @@ bspbrush_t *MakeBspBrushList(int startbrush, int endbrush,
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-bspbrush_t *AddBrushListToTail (bspbrush_t *list, bspbrush_t *tail)
-{
-	bspbrush_t	*walk, *next;
+bspbrush_t *AddBrushListToTail( bspbrush_t *list, bspbrush_t *tail ) {
+	bspbrush_t  *walk, *next;
 
-	for (walk=list ; walk ; walk=next)
-	{	// add to end of list
+	for ( walk = list ; walk ; walk = next )
+	{   // add to end of list
 		next = walk->next;
 		walk->next = NULL;
 		tail->next = walk;
@@ -627,19 +681,17 @@ bspbrush_t *AddBrushListToTail (bspbrush_t *list, bspbrush_t *tail)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-bspbrush_t *CullList(bspbrush_t *list, bspbrush_t *skip1)
-{
-	bspbrush_t	*newlist;
-	bspbrush_t	*next;
+bspbrush_t *CullList( bspbrush_t *list, bspbrush_t *skip1 ) {
+	bspbrush_t  *newlist;
+	bspbrush_t  *next;
 
 	newlist = NULL;
 
-	for ( ; list ; list = next)
+	for ( ; list ; list = next )
 	{
 		next = list->next;
-		if (list == skip1)
-		{
-			FreeBrush (list);
+		if ( list == skip1 ) {
+			FreeBrush( list );
 			continue;
 		}
 		list->next = newlist;
@@ -696,32 +748,26 @@ void WriteBrushMap(char *name, bspbrush_t *list)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-qboolean BrushGE (bspbrush_t *b1, bspbrush_t *b2)
-{
+qboolean BrushGE( bspbrush_t *b1, bspbrush_t *b2 ) {
 #ifdef ME
-	if (create_aas)
-	{
-		if (b1->original->expansionbbox != b2->original->expansionbbox)
-		{
+	if ( create_aas ) {
+		if ( b1->original->expansionbbox != b2->original->expansionbbox ) {
 			return false;
 		} //end if
-		//never have something else bite a ladder brush
-		//never have a ladder brush bite something else
-		if ( (b1->original->contents & CONTENTS_LADDER)
-			&& !(b2->original->contents & CONTENTS_LADDER))
-		{ 
+		  //never have something else bite a ladder brush
+		  //never have a ladder brush bite something else
+		if ( ( b1->original->contents & CONTENTS_LADDER )
+			 && !( b2->original->contents & CONTENTS_LADDER ) ) {
 			return false;
 		} //end if
 	} //end if
 #endif //ME
-	// detail brushes never bite structural brushes
-	if ( (b1->original->contents & CONTENTS_DETAIL) 
-		&& !(b2->original->contents & CONTENTS_DETAIL) )
-	{
+	   // detail brushes never bite structural brushes
+	if ( ( b1->original->contents & CONTENTS_DETAIL )
+		 && !( b2->original->contents & CONTENTS_DETAIL ) ) {
 		return false;
 	} //end if
-	if (b1->original->contents & CONTENTS_SOLID)
-	{
+	if ( b1->original->contents & CONTENTS_SOLID ) {
 		return true;
 	} //end if
 	return false;
@@ -734,133 +780,137 @@ qboolean BrushGE (bspbrush_t *b1, bspbrush_t *b2)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-bspbrush_t *ChopBrushes (bspbrush_t *head)
-{
-	bspbrush_t	*b1, *b2, *next;
-	bspbrush_t	*tail;
-	bspbrush_t	*keep;
-	bspbrush_t	*sub, *sub2;
-	int			c1, c2;
+bspbrush_t *ChopBrushes( bspbrush_t *head ) {
+	bspbrush_t  *b1, *b2, *next;
+	bspbrush_t  *tail;
+	bspbrush_t  *keep;
+	bspbrush_t  *sub, *sub2;
+	int c1, c2;
 	int num_csg_iterations;
 
-	Log_Print("-------- Brush CSG ---------\n");
-	Log_Print("%6d original brushes\n", CountBrushList (head));
+	Log_Print( "-------- Brush CSG ---------\n" );
+	Log_Print( "%6d original brushes\n", CountBrushList( head ) );
 
 	num_csg_iterations = 0;
-	qprintf("%6d output brushes", num_csg_iterations);
+	qprintf( "%6d output brushes", num_csg_iterations );
 
 #if 0
-	if (startbrush == 0)
-		WriteBrushList ("before.gl", head, false);
+	if ( startbrush == 0 ) {
+		WriteBrushList( "before.gl", head, false );
+	}
 #endif
 	keep = NULL;
 
 newlist:
 	// find tail
-	if (!head) return NULL;
+	if ( !head ) {
+		return NULL;
+	}
 
-	for (tail = head; tail->next; tail = tail->next)
+	for ( tail = head; tail->next; tail = tail->next )
 		;
 
-	for (b1=head ; b1 ; b1=next)
+	for ( b1 = head ; b1 ; b1 = next )
 	{
 		next = b1->next;
 
 		//if the conversion is cancelled
-		if (cancelconversion)
-		{
+		if ( cancelconversion ) {
 			b1->next = keep;
 			keep = b1;
 			continue;
 		} //end if
-		
-		for (b2 = b1->next; b2; b2 = b2->next)
+
+		for ( b2 = b1->next; b2; b2 = b2->next )
 		{
-			if (BrushesDisjoint (b1, b2))
+			if ( BrushesDisjoint( b1, b2 ) ) {
 				continue;
+			}
 
 			sub = NULL;
 			sub2 = NULL;
 			c1 = 999999;
 			c2 = 999999;
 
-			if (BrushGE (b2, b1))
-			{
-				sub = SubtractBrush (b1, b2);
-				if (sub == b1)
-				{
-					continue;		// didn't really intersect
+			if ( BrushGE( b2, b1 ) ) {
+				sub = SubtractBrush( b1, b2 );
+				if ( sub == b1 ) {
+					continue;       // didn't really intersect
 				} //end if
-				if (!sub)
-				{	// b1 is swallowed by b2
-					head = CullList (b1, b1);
+				if ( !sub ) { // b1 is swallowed by b2
+					head = CullList( b1, b1 );
 					goto newlist;
 				}
-				c1 = CountBrushList (sub);
+				c1 = CountBrushList( sub );
 			}
 
-			if ( BrushGE (b1, b2) )
-			{
-				sub2 = SubtractBrush (b2, b1);
-				if (sub2 == b2)
-					continue;		// didn't really intersect
-				if (!sub2)
-				{	// b2 is swallowed by b1
-					FreeBrushList (sub);
-					head = CullList (b1, b2);
+			if ( BrushGE( b1, b2 ) ) {
+				sub2 = SubtractBrush( b2, b1 );
+				if ( sub2 == b2 ) {
+					continue;       // didn't really intersect
+				}
+				if ( !sub2 ) { // b2 is swallowed by b1
+					FreeBrushList( sub );
+					head = CullList( b1, b2 );
 					goto newlist;
 				}
-				c2 = CountBrushList (sub2);
+				c2 = CountBrushList( sub2 );
 			}
 
-			if (!sub && !sub2)
-				continue;		// neither one can bite
+			if ( !sub && !sub2 ) {
+				continue;       // neither one can bite
 
+			}
 			// only accept if it didn't fragment
 			// (commenting this out allows full fragmentation)
-			if (c1 > 1 && c2 > 1)
-			{
-				if (sub2)
-					FreeBrushList (sub2);
-				if (sub)
-					FreeBrushList (sub);
+			if ( c1 > 1 && c2 > 1 ) {
+				if ( sub2 ) {
+					FreeBrushList( sub2 );
+				}
+				if ( sub ) {
+					FreeBrushList( sub );
+				}
 				continue;
 			}
 
-			if (c1 < c2)
-			{
-				if (sub2) FreeBrushList (sub2);
-				tail = AddBrushListToTail (sub, tail);
-				head = CullList (b1, b1);
+			if ( c1 < c2 ) {
+				if ( sub2 ) {
+					FreeBrushList( sub2 );
+				}
+				tail = AddBrushListToTail( sub, tail );
+				head = CullList( b1, b1 );
 				goto newlist;
 			} //end if
 			else
 			{
-				if (sub) FreeBrushList (sub);
-				tail = AddBrushListToTail (sub2, tail);
-				head = CullList (b1, b2);
+				if ( sub ) {
+					FreeBrushList( sub );
+				}
+				tail = AddBrushListToTail( sub2, tail );
+				head = CullList( b1, b2 );
 				goto newlist;
 			} //end else
 		} //end for
 
-		if (!b2)
-		{	// b1 is no longer intersecting anything, so keep it
+		if ( !b2 ) { // b1 is no longer intersecting anything, so keep it
 			b1->next = keep;
 			keep = b1;
 		} //end if
 		num_csg_iterations++;
-		qprintf("\r%6d", num_csg_iterations);
+		qprintf( "\r%6d", num_csg_iterations );
 	} //end for
 
-	if (cancelconversion) return keep;
+	if ( cancelconversion ) {
+		return keep;
+	}
 	//
-	qprintf("\n");
-	Log_Write("%6d output brushes\r\n", num_csg_iterations);
+	qprintf( "\n" );
+	Log_Write( "%6d output brushes\r\n", num_csg_iterations );
 
 #if 0
 	{
-		WriteBrushList ("after.gl", keep, false);
-		WriteBrushMap ("after.map", keep);
+		WriteBrushList( "after.gl", keep, false );
+		WriteBrushMap( "after.map", keep );
 	}
 #endif
 
@@ -872,30 +922,31 @@ newlist:
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-bspbrush_t *InitialBrushList (bspbrush_t *list)
-{
+bspbrush_t *InitialBrushList( bspbrush_t *list ) {
 	bspbrush_t *b;
-	bspbrush_t	*out, *newb;
-	int			i;
+	bspbrush_t  *out, *newb;
+	int i;
 
 	// only return brushes that have visible faces
 	out = NULL;
-	for (b=list ; b ; b=b->next)
+	for ( b = list ; b ; b = b->next )
 	{
 #if 0
-		for (i=0 ; i<b->numsides ; i++)
-			if (b->sides[i].flags & SFL_VISIBLE)
+		for ( i = 0 ; i < b->numsides ; i++ )
+			if ( b->sides[i].flags & SFL_VISIBLE ) {
 				break;
-		if (i == b->numsides)
+			}
+		if ( i == b->numsides ) {
 			continue;
+		}
 #endif
-		newb = CopyBrush (b);
+		newb = CopyBrush( b );
 		newb->next = out;
 		out = newb;
 
 		// clear visible, so it must be set by MarkVisibleFaces_r
 		// to be used in the optimized list
-		for (i=0 ; i<b->numsides ; i++)
+		for ( i = 0 ; i < b->numsides ; i++ )
 		{
 			newb->sides[i].original = &b->sides[i];
 //			newb->sides[i].visible = true;
@@ -911,22 +962,23 @@ bspbrush_t *InitialBrushList (bspbrush_t *list)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-bspbrush_t *OptimizedBrushList (bspbrush_t *list)
-{
+bspbrush_t *OptimizedBrushList( bspbrush_t *list ) {
 	bspbrush_t *b;
-	bspbrush_t	*out, *newb;
-	int			i;
+	bspbrush_t  *out, *newb;
+	int i;
 
 	// only return brushes that have visible faces
 	out = NULL;
-	for (b=list ; b ; b=b->next)
+	for ( b = list ; b ; b = b->next )
 	{
-		for (i=0 ; i<b->numsides ; i++)
-			if (b->sides[i].flags & SFL_VISIBLE)
+		for ( i = 0 ; i < b->numsides ; i++ )
+			if ( b->sides[i].flags & SFL_VISIBLE ) {
 				break;
-		if (i == b->numsides)
+			}
+		if ( i == b->numsides ) {
 			continue;
-		newb = CopyBrush (b);
+		}
+		newb = CopyBrush( b );
 		newb->next = out;
 		out = newb;
 	} //end for
@@ -940,8 +992,7 @@ bspbrush_t *OptimizedBrushList (bspbrush_t *list)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-tree_t *ProcessWorldBrushes(int brush_start, int brush_end)
-{
+tree_t *ProcessWorldBrushes( int brush_start, int brush_end ) {
 	bspbrush_t *brushes;
 	tree_t *tree;
 	node_t *node;
@@ -964,42 +1015,39 @@ tree_t *ProcessWorldBrushes(int brush_start, int brush_end)
 	//create a list with brushes that are within the given mins/maxs
 	//some brushes will be cut and only the part that falls within the
 	//mins/maxs will be in the bush list
-	brushes = MakeBspBrushList(brush_start, brush_end, mins, maxs);
+	brushes = MakeBspBrushList( brush_start, brush_end, mins, maxs );
 	//
 
-	if (!brushes)
-	{
-		node = AllocNode ();
+	if ( !brushes ) {
+		node = AllocNode();
 		node->planenum = PLANENUM_LEAF;
 		node->contents = CONTENTS_SOLID;
 
 		tree = Tree_Alloc();
 		tree->headnode = node;
-		VectorCopy(mins, tree->mins);
-		VectorCopy(maxs, tree->maxs);
+		VectorCopy( mins, tree->mins );
+		VectorCopy( maxs, tree->maxs );
 	} //end if
 	else
 	{
 		//Carves any intersecting solid brushes into the minimum number
-		//of non-intersecting brushes. 
-		if (!nocsg)
-		{
-			brushes = ChopBrushes(brushes);
+		//of non-intersecting brushes.
+		if ( !nocsg ) {
+			brushes = ChopBrushes( brushes );
 			/*
 			if (create_aas)
 			{
 				brushes = MergeBrushes(brushes);
 			} //end if*/
 		} //end if
-		//if the conversion is cancelled
-		if (cancelconversion)
-		{
-			FreeBrushList(brushes);
+		  //if the conversion is cancelled
+		if ( cancelconversion ) {
+			FreeBrushList( brushes );
 			return NULL;
 		} //end if
-		//create the actual bsp tree
-		tree = BrushBSP(brushes, mins, maxs);
+		  //create the actual bsp tree
+		tree = BrushBSP( brushes, mins, maxs );
 	} //end else
-	//return the tree
+	  //return the tree
 	return tree;
 } //end of the function ProcessWorldBrushes
