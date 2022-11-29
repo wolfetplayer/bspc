@@ -451,7 +451,7 @@ quakefile_t *FindQuakeFilesWithPakFilter( char *pakfilter, char *filter ) {
 #endif
 	quakefile_t *qfiles, *lastqf, *qf;
 	char pakfile[_MAX_PATH], filename[_MAX_PATH], *str;
-	//int done; //TTimo: unused
+	int done; //TTimo: unused
 
 	qfiles = NULL;
 	lastqf = NULL;
