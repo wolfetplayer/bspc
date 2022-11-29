@@ -35,7 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 // Tab Size:     3
 //===========================================================================
 
-#include "../qcommon/unzip.h"
+#include "/qcommon/unzip.h"
 
 #define QFILETYPE_UNKNOWN           0x8000
 #define QFILETYPE_PAK               0x0001
