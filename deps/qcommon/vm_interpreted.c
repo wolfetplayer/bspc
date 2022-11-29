@@ -1,31 +1,38 @@
 /*
 ===========================================================================
-Copyright (C) 1999-2005 Id Software, Inc.
 
-This file is part of Quake III Arena source code.
+Return to Castle Wolfenstein single player GPL Source Code
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
 
-Quake III Arena source code is free software; you can redistribute it
-and/or modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2 of the License,
-or (at your option) any later version.
+This file is part of the Return to Castle Wolfenstein single player GPL Source Code (RTCW SP Source Code).  
 
-Quake III Arena source code is distributed in the hope that it will be
-useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+RTCW SP Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+RTCW SP Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+along with RTCW SP Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the RTCW SP Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the RTCW SP Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
 ===========================================================================
 */
+
 #include "vm_local.h"
 
 #ifdef DEBUG_VM // bk001204
-static char	*opnames[256] = {
-	"OP_UNDEF", 
+static char *opnames[256] = {
+	"OP_UNDEF",
 
-	"OP_IGNORE", 
+	"OP_IGNORE",
 
 	"OP_BREAK",
 
@@ -111,23 +118,23 @@ static char	*opnames[256] = {
 };
 #endif
 
-#if idppc
-    #if defined(__GNUC__)
-        static inline unsigned int loadWord(void *addr) {
-            unsigned int word;
-            
-            asm("lwbrx %0,0,%1" : "=r" (word) : "r" (addr));
-            return word;
-        }
-    #else
-	#define loadWord(addr) __lwbrx(addr,0)
-    #endif
+#if defined( idppc )
+	#if defined( __GNUC__ )
+static inline unsigned int loadWord( void *addr ) {
+	unsigned int word;
+
+	asm ( "lwbrx %0,0,%1" : "=r" ( word ) : "r" ( addr ) );
+	return word;
+}
+	#else
+	#define loadWord( addr ) __lwbrx( addr,0 )
+	#endif
 #else
-	#define	loadWord(addr) *((int *)addr)
+	#define loadWord( addr ) *( (int *)addr )
 #endif
 
 char *VM_Indent( vm_t *vm ) {
-	static char	*string = "                                        ";
+	static char *string = "                                        ";
 	if ( vm->callLevel > 20 ) {
 		return string;
 	}
@@ -135,12 +142,12 @@ char *VM_Indent( vm_t *vm ) {
 }
 
 void VM_StackTrace( vm_t *vm, int programCounter, int programStack ) {
-	int		count;
+	int count;
 
 	count = 0;
 	do {
 		Com_Printf( "%s\n", VM_ValueToSymbol( vm, programCounter ) );
-		programStack =  *(int *)&vm->dataBase[programStack+4];
+		programStack =  *(int *)&vm->dataBase[programStack + 4];
 		programCounter = *(int *)&vm->dataBase[programStack];
 	} while ( programCounter != -1 && ++count < 32 );
 
@@ -153,13 +160,13 @@ VM_PrepareInterpreter
 ====================
 */
 void VM_PrepareInterpreter( vm_t *vm, vmHeader_t *header ) {
-	int		op;
-	int		pc;
-	byte	*code;
-	int		instruction;
-	int		*codeBase;
+	int op;
+	int pc;
+	byte    *code;
+	int instruction;
+	int     *codeBase;
 
-	vm->codeBase = Hunk_Alloc( vm->codeLength*4, h_high );			// we're now int aligned
+	vm->codeBase = Hunk_Alloc( vm->codeLength * 4, h_high );          // we're now int aligned
 //	memcpy( vm->codeBase, (byte *)header + header->codeOffset, vm->codeLength );
 
 	// we don't need to translate the instructions, but we still need
@@ -204,11 +211,11 @@ void VM_PrepareInterpreter( vm_t *vm, vmHeader_t *header ) {
 		case OP_GTF:
 		case OP_GEF:
 		case OP_BLOCK_COPY:
-			codeBase[pc+0] = loadWord(&code[pc]);
+			codeBase[pc + 0] = loadWord( &code[pc] );
 			pc += 4;
 			break;
 		case OP_ARG:
-			codeBase[pc+0] = code[pc];
+			codeBase[pc + 0] = code[pc];
 			pc += 1;
 			break;
 		default:
@@ -247,23 +254,23 @@ void VM_PrepareInterpreter( vm_t *vm, vmHeader_t *header ) {
 		case OP_GTF:
 		case OP_GEF:
 		case OP_BLOCK_COPY:
-			switch(op) {
-				case OP_EQ:
-				case OP_NE:
-				case OP_LTI:
-				case OP_LEI:
-				case OP_GTI:
-				case OP_GEI:
-				case OP_LTU:
-				case OP_LEU:
-				case OP_GTU:
-				case OP_GEU:
-				case OP_EQF:
-				case OP_NEF:
-				case OP_LTF:
-				case OP_LEF:
-				case OP_GTF:
-				case OP_GEF:
+			switch ( op ) {
+			case OP_EQ:
+			case OP_NE:
+			case OP_LTI:
+			case OP_LEI:
+			case OP_GTI:
+			case OP_GEI:
+			case OP_LTU:
+			case OP_LEU:
+			case OP_GTU:
+			case OP_GEU:
+			case OP_EQF:
+			case OP_NEF:
+			case OP_LTF:
+			case OP_LEF:
+			case OP_GTF:
+			case OP_GEF:
 				codeBase[pc] = vm->instructionPointers[codeBase[pc]];
 				break;
 			default:
@@ -304,24 +311,24 @@ an OP_ENTER instruction, which will subtract space for
 locals from sp
 ==============
 */
-#define	MAX_STACK	256
-#define	STACK_MASK	(MAX_STACK-1)
+#define MAX_STACK   256
+#define STACK_MASK  ( MAX_STACK - 1 )
 //#define	DEBUG_VM
 
-#define	DEBUGSTR va("%s%i", VM_Indent(vm), opStack-stack )
+#define DEBUGSTR va( "%s%i", VM_Indent( vm ), opStack - stack )
 
-int	VM_CallInterpreted( vm_t *vm, int *args ) {
-	int		stack[MAX_STACK];
-	int		*opStack;
-	int		programCounter;
-	int		programStack;
-	int		stackOnEntry;
-	byte	*image;
-	int		*codeImage;
-	int		v1;
-	int		dataMask;
+int VM_CallInterpreted( vm_t *vm, int *args ) {
+	int stack[MAX_STACK];
+	int     *opStack;
+	int programCounter;
+	int programStack;
+	int stackOnEntry;
+	byte    *image;
+	int     *codeImage;
+	int v1;
+	int dataMask;
 #ifdef DEBUG_VM
-	vmSymbol_t	*profileSymbol;
+	vmSymbol_t  *profileSymbol;
 #endif
 
 	// interpret the code
@@ -335,12 +342,12 @@ int	VM_CallInterpreted( vm_t *vm, int *args ) {
 	// uncomment this for debugging breakpoints
 	vm->breakFunction = 0;
 #endif
-	// set up the stack frame 
+	// set up the stack frame
 
 	image = vm->dataBase;
 	codeImage = (int *)vm->codeBase;
 	dataMask = vm->dataMask;
-	
+
 	// leave a free spot at start of stack so
 	// that as long as opStack is valid, opStack-1 will
 	// not corrupt anything
@@ -359,12 +366,12 @@ int	VM_CallInterpreted( vm_t *vm, int *args ) {
 	*(int *)&image[ programStack + 16] = args[2];
 	*(int *)&image[ programStack + 12] = args[1];
 	*(int *)&image[ programStack + 8 ] = args[0];
-	*(int *)&image[ programStack + 4 ] = 0;	// return stack
-	*(int *)&image[ programStack ] = -1;	// will terminate the loop on return
+	*(int *)&image[ programStack + 4 ] = 0; // return stack
+	*(int *)&image[ programStack ] = -1;    // will terminate the loop on return
 
 	vm->callLevel = 0;
-	
-	VM_Debug(0);
+
+	VM_Debug( 0 );
 
 //	vm_debugLevel=2;
 	// main interpreter loop, will exit when a LEAVE instruction
@@ -373,12 +380,12 @@ int	VM_CallInterpreted( vm_t *vm, int *args ) {
 #define r2 codeImage[programCounter]
 
 	while ( 1 ) {
-		int		opcode,	r0, r1;
+		int opcode, r0, r1;
 //		unsigned int	r2;
 
 nextInstruction:
-		r0 = ((int *)opStack)[0];
-		r1 = ((int *)opStack)[-1];
+		r0 = ( (int *)opStack )[0];
+		r1 = ( (int *)opStack )[-1];
 nextInstruction2:
 		opcode = codeImage[ programCounter++ ];
 #ifdef DEBUG_VM
@@ -389,7 +396,7 @@ nextInstruction2:
 		if ( opStack < stack ) {
 			Com_Error( ERR_DROP, "VM opStack underflow" );
 		}
-		if ( opStack >= stack+MAX_STACK ) {
+		if ( opStack >= stack + MAX_STACK ) {
 			Com_Error( ERR_DROP, "VM opStack overflow" );
 		}
 
@@ -419,13 +426,13 @@ nextInstruction2:
 			opStack++;
 			r1 = r0;
 			r0 = *opStack = r2;
-			
+
 			programCounter += 4;
 			goto nextInstruction2;
 		case OP_LOCAL:
 			opStack++;
 			r1 = r0;
-			r0 = *opStack = r2+programStack;
+			r0 = *opStack = r2 + programStack;
 
 			programCounter += 4;
 			goto nextInstruction2;
@@ -436,25 +443,25 @@ nextInstruction2:
 				Com_Error( ERR_DROP, "OP_LOAD4 misaligned" );
 			}
 #endif
-			r0 = *opStack = *(int *)&image[ r0&dataMask ];
+			r0 = *opStack = *(int *)&image[ r0 & dataMask ];
 			goto nextInstruction2;
 		case OP_LOAD2:
-			r0 = *opStack = *(unsigned short *)&image[ r0&dataMask ];
+			r0 = *opStack = *(unsigned short *)&image[ r0 & dataMask ];
 			goto nextInstruction2;
 		case OP_LOAD1:
-			r0 = *opStack = image[ r0&dataMask ];
+			r0 = *opStack = image[ r0 & dataMask ];
 			goto nextInstruction2;
 
 		case OP_STORE4:
-			*(int *)&image[ r1&(dataMask & ~3) ] = r0;
+			*(int *)&image[ r1 & ( dataMask & ~3 ) ] = r0;
 			opStack -= 2;
 			goto nextInstruction;
 		case OP_STORE2:
-			*(short *)&image[ r1&(dataMask & ~1) ] = r0;
+			*(short *)&image[ r1 & ( dataMask & ~1 ) ] = r0;
 			opStack -= 2;
 			goto nextInstruction;
 		case OP_STORE1:
-			image[ r1&dataMask ] = r0;
+			image[ r1 & dataMask ] = r0;
 			opStack -= 2;
 			goto nextInstruction;
 
@@ -466,44 +473,44 @@ nextInstruction2:
 			goto nextInstruction;
 
 		case OP_BLOCK_COPY:
-			{
-				int		*src, *dest;
-				int		i, count, srci, desti;
+		{
+			int     *src, *dest;
+			int i, count, srci, desti;
 
-				count = r2;
-				// MrE: copy range check
-				srci = r0 & dataMask;
-				desti = r1 & dataMask;
-				count = ((srci + count) & dataMask) - srci;
-				count = ((desti + count) & dataMask) - desti;
+			count = r2;
+			// MrE: copy range check
+			srci = r0 & dataMask;
+			desti = r1 & dataMask;
+			count = ( ( srci + count ) & dataMask ) - srci;
+			count = ( ( desti + count ) & dataMask ) - desti;
 
-				src = (int *)&image[ r0&dataMask ];
-				dest = (int *)&image[ r1&dataMask ];
-				if ( ( (int)src | (int)dest | count ) & 3 ) {
-					Com_Error( ERR_DROP, "OP_BLOCK_COPY not dword aligned" );
-				}
-				count >>= 2;
-				for ( i = count-1 ; i>= 0 ; i-- ) {
-					dest[i] = src[i];
-				}
-				programCounter += 4;
-				opStack -= 2;
+			src = (int *)&image[ r0 & dataMask ];
+			dest = (int *)&image[ r1 & dataMask ];
+			if ( ( (int)src | (int)dest | count ) & 3 ) {
+				Com_Error( ERR_DROP, "OP_BLOCK_COPY not dword aligned" );
 			}
+			count >>= 2;
+			for ( i = count - 1 ; i >= 0 ; i-- ) {
+				dest[i] = src[i];
+			}
+			programCounter += 4;
+			opStack -= 2;
+		}
 			goto nextInstruction;
 
 		case OP_CALL:
 			// save current program counter
 			*(int *)&image[ programStack ] = programCounter;
-			
+
 			// jump to the location on the stack
 			programCounter = r0;
 			opStack--;
 			if ( programCounter < 0 ) {
 				// system call
-				int		r;
-				int		temp;
+				int r;
+				int temp;
 #ifdef DEBUG_VM
-				int		stomped;
+				int stomped;
 
 				if ( vm_debugLevel ) {
 					Com_Printf( "%s---> systemcall(%i)\n", DEBUGSTR, -1 - programCounter );
@@ -541,7 +548,7 @@ nextInstruction2:
 			}
 			goto nextInstruction;
 
-		// push and pop are only needed for discarded or bad function return values
+			// push and pop are only needed for discarded or bad function return values
 		case OP_PUSH:
 			opStack++;
 			goto nextInstruction;
@@ -560,7 +567,7 @@ nextInstruction2:
 			programStack -= v1;
 #ifdef DEBUG_VM
 			// save old stack frame for debugging traces
-			*(int *)&image[programStack+4] = programStack + v1;
+			*(int *)&image[programStack + 4] = programStack + v1;
 			if ( vm_debugLevel ) {
 				Com_Printf( "%s---> %s\n", DEBUGSTR, VM_ValueToSymbol( vm, programCounter - 5 ) );
 				if ( vm->breakFunction && programCounter - 5 == vm->breakFunction ) {
@@ -594,11 +601,11 @@ nextInstruction2:
 			}
 			goto nextInstruction;
 
-		/*
-		===================================================================
-		BRANCHES
-		===================================================================
-		*/
+			/*
+			===================================================================
+			BRANCHES
+			===================================================================
+			*/
 
 		case OP_JUMP:
 			programCounter = r0;
@@ -609,7 +616,7 @@ nextInstruction2:
 		case OP_EQ:
 			opStack -= 2;
 			if ( r1 == r0 ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+				programCounter = r2;    //vm->instructionPointers[r2];
 				goto nextInstruction;
 			} else {
 				programCounter += 4;
@@ -619,7 +626,7 @@ nextInstruction2:
 		case OP_NE:
 			opStack -= 2;
 			if ( r1 != r0 ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+				programCounter = r2;    //vm->instructionPointers[r2];
 				goto nextInstruction;
 			} else {
 				programCounter += 4;
@@ -629,7 +636,7 @@ nextInstruction2:
 		case OP_LTI:
 			opStack -= 2;
 			if ( r1 < r0 ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+				programCounter = r2;    //vm->instructionPointers[r2];
 				goto nextInstruction;
 			} else {
 				programCounter += 4;
@@ -639,7 +646,7 @@ nextInstruction2:
 		case OP_LEI:
 			opStack -= 2;
 			if ( r1 <= r0 ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+				programCounter = r2;    //vm->instructionPointers[r2];
 				goto nextInstruction;
 			} else {
 				programCounter += 4;
@@ -649,7 +656,7 @@ nextInstruction2:
 		case OP_GTI:
 			opStack -= 2;
 			if ( r1 > r0 ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+				programCounter = r2;    //vm->instructionPointers[r2];
 				goto nextInstruction;
 			} else {
 				programCounter += 4;
@@ -659,7 +666,7 @@ nextInstruction2:
 		case OP_GEI:
 			opStack -= 2;
 			if ( r1 >= r0 ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+				programCounter = r2;    //vm->instructionPointers[r2];
 				goto nextInstruction;
 			} else {
 				programCounter += 4;
@@ -668,8 +675,8 @@ nextInstruction2:
 
 		case OP_LTU:
 			opStack -= 2;
-			if ( ((unsigned)r1) < ((unsigned)r0) ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+			if ( ( (unsigned)r1 ) < ( (unsigned)r0 ) ) {
+				programCounter = r2;    //vm->instructionPointers[r2];
 				goto nextInstruction;
 			} else {
 				programCounter += 4;
@@ -678,8 +685,8 @@ nextInstruction2:
 
 		case OP_LEU:
 			opStack -= 2;
-			if ( ((unsigned)r1) <= ((unsigned)r0) ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+			if ( ( (unsigned)r1 ) <= ( (unsigned)r0 ) ) {
+				programCounter = r2;    //vm->instructionPointers[r2];
 				goto nextInstruction;
 			} else {
 				programCounter += 4;
@@ -688,8 +695,8 @@ nextInstruction2:
 
 		case OP_GTU:
 			opStack -= 2;
-			if ( ((unsigned)r1) > ((unsigned)r0) ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+			if ( ( (unsigned)r1 ) > ( (unsigned)r0 ) ) {
+				programCounter = r2;    //vm->instructionPointers[r2];
 				goto nextInstruction;
 			} else {
 				programCounter += 4;
@@ -698,8 +705,8 @@ nextInstruction2:
 
 		case OP_GEU:
 			opStack -= 2;
-			if ( ((unsigned)r1) >= ((unsigned)r0) ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+			if ( ( (unsigned)r1 ) >= ( (unsigned)r0 ) ) {
+				programCounter = r2;    //vm->instructionPointers[r2];
 				goto nextInstruction;
 			} else {
 				programCounter += 4;
@@ -707,8 +714,8 @@ nextInstruction2:
 			}
 
 		case OP_EQF:
-			if ( ((float *)opStack)[-1] == *(float *)opStack ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+			if ( ( (float *)opStack )[-1] == *(float *)opStack ) {
+				programCounter = r2;    //vm->instructionPointers[r2];
 				opStack -= 2;
 				goto nextInstruction;
 			} else {
@@ -718,8 +725,8 @@ nextInstruction2:
 			}
 
 		case OP_NEF:
-			if ( ((float *)opStack)[-1] != *(float *)opStack ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+			if ( ( (float *)opStack )[-1] != *(float *)opStack ) {
+				programCounter = r2;    //vm->instructionPointers[r2];
 				opStack -= 2;
 				goto nextInstruction;
 			} else {
@@ -729,8 +736,8 @@ nextInstruction2:
 			}
 
 		case OP_LTF:
-			if ( ((float *)opStack)[-1] < *(float *)opStack ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+			if ( ( (float *)opStack )[-1] < *(float *)opStack ) {
+				programCounter = r2;    //vm->instructionPointers[r2];
 				opStack -= 2;
 				goto nextInstruction;
 			} else {
@@ -740,8 +747,8 @@ nextInstruction2:
 			}
 
 		case OP_LEF:
-			if ( ((float *)opStack)[-1] <= *(float *)opStack ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+			if ( ( (float *)opStack )[-1] <= *(float *)opStack ) {
+				programCounter = r2;    //vm->instructionPointers[r2];
 				opStack -= 2;
 				goto nextInstruction;
 			} else {
@@ -751,8 +758,8 @@ nextInstruction2:
 			}
 
 		case OP_GTF:
-			if ( ((float *)opStack)[-1] > *(float *)opStack ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+			if ( ( (float *)opStack )[-1] > *(float *)opStack ) {
+				programCounter = r2;    //vm->instructionPointers[r2];
 				opStack -= 2;
 				goto nextInstruction;
 			} else {
@@ -762,8 +769,8 @@ nextInstruction2:
 			}
 
 		case OP_GEF:
-			if ( ((float *)opStack)[-1] >= *(float *)opStack ) {
-				programCounter = r2;	//vm->instructionPointers[r2];
+			if ( ( (float *)opStack )[-1] >= *(float *)opStack ) {
+				programCounter = r2;    //vm->instructionPointers[r2];
 				opStack -= 2;
 				goto nextInstruction;
 			} else {
@@ -773,7 +780,7 @@ nextInstruction2:
 			}
 
 
-		//===================================================================
+			//===================================================================
 
 		case OP_NEGI:
 			*opStack = -r0;
@@ -791,7 +798,7 @@ nextInstruction2:
 			opStack--;
 			goto nextInstruction;
 		case OP_DIVU:
-			opStack[-1] = ((unsigned)r1) / ((unsigned)r0);
+			opStack[-1] = ( (unsigned)r1 ) / ( (unsigned)r0 );
 			opStack--;
 			goto nextInstruction;
 		case OP_MODI:
@@ -799,7 +806,7 @@ nextInstruction2:
 			opStack--;
 			goto nextInstruction;
 		case OP_MODU:
-			opStack[-1] = ((unsigned)r1) % (unsigned)r0;
+			opStack[-1] = ( (unsigned)r1 ) % (unsigned)r0;
 			opStack--;
 			goto nextInstruction;
 		case OP_MULI:
@@ -807,24 +814,24 @@ nextInstruction2:
 			opStack--;
 			goto nextInstruction;
 		case OP_MULU:
-			opStack[-1] = ((unsigned)r1) * ((unsigned)r0);
+			opStack[-1] = ( (unsigned)r1 ) * ( (unsigned)r0 );
 			opStack--;
 			goto nextInstruction;
 
 		case OP_BAND:
-			opStack[-1] = ((unsigned)r1) & ((unsigned)r0);
+			opStack[-1] = ( (unsigned)r1 ) & ( (unsigned)r0 );
 			opStack--;
 			goto nextInstruction;
 		case OP_BOR:
-			opStack[-1] = ((unsigned)r1) | ((unsigned)r0);
+			opStack[-1] = ( (unsigned)r1 ) | ( (unsigned)r0 );
 			opStack--;
 			goto nextInstruction;
 		case OP_BXOR:
-			opStack[-1] = ((unsigned)r1) ^ ((unsigned)r0);
+			opStack[-1] = ( (unsigned)r1 ) ^ ( (unsigned)r0 );
 			opStack--;
 			goto nextInstruction;
 		case OP_BCOM:
-			opStack[-1] = ~ ((unsigned)r0);
+			opStack[-1] = ~( (unsigned)r0 );
 			goto nextInstruction;
 
 		case OP_LSH:
@@ -836,7 +843,7 @@ nextInstruction2:
 			opStack--;
 			goto nextInstruction;
 		case OP_RSHU:
-			opStack[-1] = ((unsigned)r1) >> r0;
+			opStack[-1] = ( (unsigned)r1 ) >> r0;
 			opStack--;
 			goto nextInstruction;
 
@@ -844,19 +851,19 @@ nextInstruction2:
 			*(float *)opStack =  -*(float *)opStack;
 			goto nextInstruction;
 		case OP_ADDF:
-			*(float *)(opStack-1) = *(float *)(opStack-1) + *(float *)opStack;
+			*( float * )( opStack - 1 ) = *( float * )( opStack - 1 ) + *(float *)opStack;
 			opStack--;
 			goto nextInstruction;
 		case OP_SUBF:
-			*(float *)(opStack-1) = *(float *)(opStack-1) - *(float *)opStack;
+			*( float * )( opStack - 1 ) = *( float * )( opStack - 1 ) - *(float *)opStack;
 			opStack--;
 			goto nextInstruction;
 		case OP_DIVF:
-			*(float *)(opStack-1) = *(float *)(opStack-1) / *(float *)opStack;
+			*( float * )( opStack - 1 ) = *( float * )( opStack - 1 ) / *(float *)opStack;
 			opStack--;
 			goto nextInstruction;
 		case OP_MULF:
-			*(float *)(opStack-1) = *(float *)(opStack-1) * *(float *)opStack;
+			*( float * )( opStack - 1 ) = *( float * )( opStack - 1 ) * *(float *)opStack;
 			opStack--;
 			goto nextInstruction;
 

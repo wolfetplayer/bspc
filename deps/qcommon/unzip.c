@@ -1,9 +1,36 @@
+/*
+===========================================================================
+
+Return to Castle Wolfenstein single player GPL Source Code
+Copyright (C) 1999-2010 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Return to Castle Wolfenstein single player GPL Source Code (RTCW SP Source Code).  
+
+RTCW SP Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+RTCW SP Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with RTCW SP Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the RTCW SP Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the RTCW SP Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
 /*****************************************************************************
  * name:		unzip.c
  *
  * desc:		IO on .zip files using portions of zlib 
  *
- * $Archive: /MissionPack/code/qcommon/unzip.c $
  *
  *****************************************************************************/
 
@@ -940,7 +967,6 @@ static int deflateInit2_ OF((z_streamp strm, int  level, int  method,
 */
 static int inflateInit2_ OF((z_streamp strm, int  windowBits,
                                       const char *version, int stream_size));
-
 #define deflateInit(strm, level) \
         deflateInit_((strm), (level),       ZLIB_VERSION, sizeof(z_stream))
 #define inflateInit(strm) \
@@ -1298,6 +1324,7 @@ extern unzFile unzReOpen (const char* path, unzFile file)
 	Com_Memcpy(s, (unz_s*)file, sizeof(unz_s));
 
 	s->file = fin;
+	s->pfile_in_zip_read = NULL;
 	return (unzFile)s;	
 }
 
@@ -2042,10 +2069,12 @@ extern int unzReadCurrentFile  (unzFile file, void *buf, unsigned len)
 		else
 		{
 			uLong uTotalOutBefore,uTotalOutAfter;
+			const Byte *bufBefore;
 			uLong uOutThis;
 			int flush=Z_SYNC_FLUSH;
 
 			uTotalOutBefore = pfile_in_zip_read_info->stream.total_out;
+			bufBefore = pfile_in_zip_read_info->stream.next_out;
 
 			/*
 			if ((pfile_in_zip_read_info->rest_read_uncompressed ==
@@ -2058,6 +2087,10 @@ extern int unzReadCurrentFile  (unzFile file, void *buf, unsigned len)
 			uTotalOutAfter = pfile_in_zip_read_info->stream.total_out;
 			uOutThis = uTotalOutAfter-uTotalOutBefore;
 			
+//			pfile_in_zip_read_info->crc32 = 
+//                crc32(pfile_in_zip_read_info->crc32,bufBefore,
+//                        (uInt)(uOutThis));
+
 			pfile_in_zip_read_info->rest_read_uncompressed -=
                 uOutThis;
 
@@ -2605,6 +2638,7 @@ int inflate_blocks(inflate_blocks_statef *s, z_streamp z, int r)
           {
             uInt bl, bd;
             inflate_huft *tl, *td;
+
             inflate_trees_fixed(&bl, &bd, &tl, &td, z);
             s->sub.decode.codes = inflate_codes_new(bl, bd, tl, td, z);
             if (s->sub.decode.codes == Z_NULL)
@@ -2755,8 +2789,6 @@ int inflate_blocks(inflate_blocks_statef *s, z_streamp z, int r)
         inflate_huft *tl, *td;
         inflate_codes_statef *c;
 
-        tl = NULL;
-        td = NULL;
         bl = 9;         /* must be <= 9 for lookahead assumptions */
         bd = 6;         /* must be <= 9 for lookahead assumptions */
         t = s->sub.trees.table;
@@ -2830,6 +2862,7 @@ void inflate_set_dictionary(inflate_blocks_statef *s, const Byte *d, uInt n)
   zmemcpy(s->window, d, n);
   s->read = s->write = s->window + n;
 }
+
 
 /* Returns true if inflate is currently at the end of a block generated
  * by Z_SYNC_FLUSH or Z_FULL_FLUSH. 
@@ -4192,6 +4225,7 @@ int inflate(z_streamp z, int f)
 #endif
 }
 
+
 // defined but not used
 #if 0
 int inflateSetDictionary(z_streamp z, const Byte *dictionary, uInt dictLength)
@@ -4213,6 +4247,7 @@ int inflateSetDictionary(z_streamp z, const Byte *dictionary, uInt dictLength)
   z->state->mode = imBLOCKS;
   return Z_OK;
 }
+
 
 int inflateSync(z_streamp z)
 {
@@ -4262,6 +4297,7 @@ int inflateSync(z_streamp z)
   z->state->mode = imBLOCKS;
   return Z_OK;
 }
+
 
 /* Returns true if inflate is currently at the end of a block generated
  * by Z_SYNC_FLUSH or Z_FULL_FLUSH. This function is used by one PPP
