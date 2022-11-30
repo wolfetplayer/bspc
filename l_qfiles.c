@@ -46,7 +46,6 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 #include "qbsp.h"
-#define stricmp strcasecmp
 
 //file extensions with their type
 typedef struct qfile_exttype_s

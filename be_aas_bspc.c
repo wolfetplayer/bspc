@@ -38,6 +38,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "botlib/be_aas.h"
 #include "botlib/be_aas_def.h"
 #include "qcommon/cm_public.h"
+#include "be_aas_bspc.h"
+#include <stdarg.h>
+
 //===========================================================================
 //
 // Name:			b_aas_bspc.c

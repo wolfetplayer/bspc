@@ -34,6 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "l_mem.h"
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <assert.h>
 
 #ifndef SIN
 #define SIN

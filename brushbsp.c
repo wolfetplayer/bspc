@@ -41,6 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "aas_store.h"
 #include "aas_cfg.h"
 
+#include <stddef.h>
 #include <assert.h>
 
 /*
