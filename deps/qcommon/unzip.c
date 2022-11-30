@@ -34,7 +34,7 @@ If you have questions concerning this license or the applicable additional terms
  *
  *****************************************************************************/
 
-#include "qcommon/qcommon.h"
+#include "client.h"
 #include "unzip.h"
 
 /* unzip.h -- IO for uncompress .zip files using zlib 

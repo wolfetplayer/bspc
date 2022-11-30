@@ -1,5 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Windows Desktop
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33110.190
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bspc", "bspc.vcxproj", "{4E4EBC16-F345-4667-84E1-86633BAFDAE6}"
 EndProject
 Global
@@ -16,11 +18,7 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(SourceCodeControl) = preSolution
-		SccNumberOfProjects = 1
-		SccProjectUniqueName0 = bspc.vcproj
-		SccProjectName0 = \u0022$/source/code/bspc\u0022,\u0020IGAAAAAA
-		SccLocalPath0 = .
-		SccProvider0 = MSSCCI:Perforce\u0020SCM
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BA06BADC-111D-452B-8089-BADDA40DC417}
 	EndGlobalSection
 EndGlobal

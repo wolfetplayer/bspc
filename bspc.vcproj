@@ -1256,11 +1256,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\aasfile.h"
+				RelativePath="botlib\aasfile.h"
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\be_aas_bsp.h"
+				RelativePath="botlib\be_aas_bsp.h"
 				>
 			</File>
 			<File
@@ -1268,95 +1268,99 @@
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\be_aas_cluster.h"
+				RelativePath="botlib\be_aas_cluster.h"
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\be_aas_debug.h"
+				RelativePath="botlib\be_aas_debug.h"
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\be_aas_def.h"
+				RelativePath="botlib\be_aas_def.h"
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\be_aas_entity.h"
+				RelativePath="botlib\be_aas_entity.h"
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\be_aas_file.h"
+				RelativePath="botlib\be_aas_file.h"
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\be_aas_funcs.h"
+				RelativePath="botlib\be_aas_funcs.h"
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\be_aas_main.h"
+				RelativePath="botlib\be_aas_main.h"
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\be_aas_move.h"
+				RelativePath="botlib\be_aas_move.h"
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\be_aas_optimize.h"
+				RelativePath="botlib\be_aas_optimize.h"
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\be_aas_reach.h"
+				RelativePath="botlib\be_aas_reach.h"
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\be_aas_route.h"
+				RelativePath="botlib\be_aas_route.h"
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\be_aas_routealt.h"
+				RelativePath="botlib\be_aas_routealt.h"
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\be_aas_sample.h"
+				RelativePath="botlib\be_aas_routetable.h"
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\be_interface.h"
+				RelativePath="botlib\be_aas_sample.h"
 				>
 			</File>
 			<File
-				RelativePath="..\game\bg_public.h"
+				RelativePath="botlib\be_interface.h"
 				>
 			</File>
 			<File
-				RelativePath="..\cgame\cg_public.h"
+				RelativePath="qcommon\bg_public.h"
 				>
 			</File>
 			<File
-				RelativePath="..\client\client.h"
+				RelativePath="qcommon\cg_public.h"
 				>
 			</File>
 			<File
-				RelativePath="..\qcommon\cm_local.h"
+				RelativePath="qcommon\client.h"
 				>
 			</File>
 			<File
-				RelativePath="..\qcommon\cm_patch.h"
+				RelativePath="qcommon\cm_local.h"
 				>
 			</File>
 			<File
-				RelativePath="..\qcommon\cm_polylib.h"
+				RelativePath="qcommon\cm_patch.h"
 				>
 			</File>
 			<File
-				RelativePath="..\qcommon\cm_public.h"
+				RelativePath="qcommon\cm_polylib.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ui\keycodes.h"
+				RelativePath="qcommon\cm_public.h"
 				>
 			</File>
 			<File
-				RelativePath="..\client\keys.h"
+				RelativePath="qcommon\keycodes.h"
+				>
+			</File>
+			<File
+				RelativePath="qcommon\keys.h"
 				>
 			</File>
 			<File
@@ -1388,7 +1392,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\l_libvar.h"
+				RelativePath="botlib\l_libvar.h"
 				>
 			</File>
 			<File
@@ -1396,7 +1400,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\l_log.h"
+				RelativePath="botlib\l_log.h"
 				>
 			</File>
 			<File
@@ -1408,7 +1412,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\l_memory.h"
+				RelativePath="botlib\l_memory.h"
 				>
 			</File>
 			<File
@@ -1416,7 +1420,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\l_precomp.h"
+				RelativePath="botlib\l_precomp.h"
 				>
 			</File>
 			<File
@@ -1424,11 +1428,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\l_script.h"
+				RelativePath="botlib\l_script.h"
 				>
 			</File>
 			<File
-				RelativePath="..\botlib\l_struct.h"
+				RelativePath="botlib\l_struct.h"
 				>
 			</File>
 			<File
@@ -1448,7 +1452,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\game\q_shared.h"
+				RelativePath="qcommon\q_shared.h"
 				>
 			</File>
 			<File
@@ -1456,11 +1460,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\qcommon\qcommon.h"
+				RelativePath="qcommon\qcommon.h"
 				>
 			</File>
 			<File
-				RelativePath="..\qcommon\qfiles.h"
+				RelativePath="qcommon\qfiles.h"
 				>
 			</File>
 			<File
@@ -1468,27 +1472,27 @@
 				>
 			</File>
 			<File
-				RelativePath="..\client\snd_public.h"
+				RelativePath="qcommon\snd_public.h"
 				>
 			</File>
 			<File
-				RelativePath="..\game\surfaceflags.h"
+				RelativePath="qcommon\surfaceflags.h"
 				>
 			</File>
 			<File
-				RelativePath="..\renderer\tr_public.h"
+				RelativePath="qcommon\tr_public.h"
 				>
 			</File>
 			<File
-				RelativePath="..\cgame\tr_types.h"
+				RelativePath="qcommon\tr_types.h"
 				>
 			</File>
 			<File
-				RelativePath="..\ui\ui_public.h"
+				RelativePath="qcommon\ui_public.h"
 				>
 			</File>
 			<File
-				RelativePath="..\qcommon\unzip.h"
+				RelativePath="qcommon\unzip.h"
 				>
 			</File>
 		</Filter>

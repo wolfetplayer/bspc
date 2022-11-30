@@ -43,6 +43,7 @@ GAME_OBJS = \
 	be_aas_reach.o\
 	be_aas_route.o\
 	be_aas_routealt.o\
+	be_aas_routetable.o \
 	be_aas_sample.o\
 	be_aas_sound.o\
 	be_ai2_dmq2.o\

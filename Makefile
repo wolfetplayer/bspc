@@ -37,6 +37,7 @@ GAME_OBJS = \
 	deps/botlib/be_aas_optimize.o\
 	deps/botlib/be_aas_reach.o\
 	deps/botlib/be_aas_sample.o\
+	debps/botlib/be_aas_routetable.o\
 	brushbsp.o\
 	bspc.o\
 	deps/qcommon/cm_load.o\
@@ -61,6 +62,7 @@ GAME_OBJS = \
 	l_qfiles.o\
 	deps/botlib/l_script.o\
 	deps/botlib/l_struct.o\
+	deps/botlib/l_utils.o\
 	l_threads.o\
 	l_utils.o\
 	leakfile.o\
@@ -76,8 +78,6 @@ GAME_OBJS = \
 	textures.o\
 	tree.o\
 	deps/qcommon/unzip.o
-
-        #tetrahedron.o
 
 EXEC = bspc
 

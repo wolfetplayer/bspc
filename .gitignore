@@ -3,3 +3,4 @@ bspc
 *.log
 *.o
 Release
+Debug

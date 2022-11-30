@@ -18,6 +18,7 @@ OBJS= be_aas_bspq2.obj \
 	be_aas_reach.obj \
 	be_aas_route.obj \
 	be_aas_routealt.obj \
+	be_aas_routetable.obj \
 	be_aas_sample.obj \
 	be_aas_sound.obj \
 	be_ai2_dm.obj \
