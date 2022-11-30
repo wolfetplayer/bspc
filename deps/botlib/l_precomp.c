@@ -91,7 +91,7 @@ typedef enum {qfalse, qtrue}    qboolean;
 
 #define qtrue   true
 #define qfalse  false
-#define Q_stricmp   strcasecmp
+#define Q_stricmp   stricmp
 
 #define MAX_TOKENLENGTH     1024
 

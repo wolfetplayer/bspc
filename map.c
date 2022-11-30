@@ -46,9 +46,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "aas_store.h"		//AAS_MAX_BBOXES
 #include "aas_cfg.h"
 
-// TTimo: messy...
-//#define stricmp strcasecmp
-
 #define Sign( x )     ( x < 0 ? 1 : 0 )
 
 int nummapbrushes;

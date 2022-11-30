@@ -62,12 +62,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #define BSPC_VERSION        "2.1c-wolf"
 
-// TTimo: some messy config things
-#ifndef BSPC
-  #define BSPC  // RF
-#endif
-#define stricmp strcasecmp
-
 void AAS_InitBotImport();
 void AAS_InitClustering();
 void AAS_ShowTotals();
