@@ -80,7 +80,7 @@ GAME_OBJS = \
 	deps/qcommon/md4.o\
 	nodraw.o\
 	portals.o\
-	tetrahedron.o\
+	#tetrahedron.o\#
 	textures.o\
 	tree.o\
 	deps/qcommon/unzip.o
