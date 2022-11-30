@@ -44,12 +44,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "botlib/l_struct.h"
 #include "botlib/l_libvar.h"
 
-// TTimo: this is a f*g mess
-// I got rid of all occurences except for bspc it seems
-// all code *should* be using Q_stricmp
-#ifdef BSPC
-#define stricmp strcasecmp
-#endif
+#include <stddef.h>
 
 ///////////////////////////////////
 extern void LibVarSet( char *var_name, char *value );
